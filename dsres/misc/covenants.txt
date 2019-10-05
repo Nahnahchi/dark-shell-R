@@ -1,0 +1,10 @@
+0 none
+1 way-of-white
+2 princess's-guard
+3 warrior-of-sunlight
+4 darkwraith
+5 path-of-the-gragon
+6 gravelord-servant
+7 forest-hunter
+8 darkmoon-blade
+9 chaos-servant
