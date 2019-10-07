@@ -3,9 +3,12 @@ import sys
 from sys import argv
 from os import _exit, system
 from os.path import dirname, realpath, join
+from time import sleep
+from threading import Thread
 from game_wrapper import DarkSouls
 from dslib.ds_cmprocessor import DSRCmp
-from dsres.ds_commands import DS_NEST
+from dslib.ds_gui import DSPositionGUI
+from dsres.ds_commands import DS_NEST, DS_STATIC
 dir_path = dirname(realpath(__file__))
 sys.path.append(join(dir_path, "dsprh"))
 clr.AddReference("DSRInterface")
@@ -20,6 +23,24 @@ class DarkShell(DSRCmp):
         self.game = DarkSouls(hook)
         self.set_nested_completer(DS_NEST)
         self.execute_source(script)
+        if script is None:
+            open(self.game.STATIC_SOURCE, "a")
+            Thread(target=self.execute_static_commands).start()
+
+    def execute_static_commands(self):
+        execute = True
+        sleep(5)
+        while True:
+            if execute:
+                if self.game.can_read():
+                    self.execute_source(self.game.STATIC_SOURCE)
+                    execute = False
+                else:
+                    sleep(1)
+                    continue
+            if not self.game.can_read():
+                execute = True
+            sleep(1)
 
     @staticmethod
     def do_clear(args):
@@ -37,9 +58,38 @@ class DarkShell(DSRCmp):
     def do_end(args):
         _exit(0)
 
+    def do_begin(self, args):
+        self.execute_source(self.game.STATIC_SOURCE)
+
     @staticmethod
-    def do_begin(args):
-        pass
+    def help_static():
+        print("\nUsage:\t",
+              "static [command [args]]\n\t",
+              "static list\n\t",
+              "static clean\n\t",
+              "static remove [line-num]")
+        print("\nOptions:")
+        for opt in DS_STATIC.keys():
+            print("\t%s" % opt)
+        print("\n")
+
+    def do_static(self, args):
+        try:
+            if args[0] in DS_STATIC.keys():
+                self.game.switch(command="static", arguments=args)
+            else:
+                if args[0] not in DS_NEST.keys():
+                    print("Unrecognized command: %s" % args[0])
+                else:
+                    print("Command '%s' can't be static!" % args[0])
+        except FileNotFoundError:
+            pass
+
+    def do_pos_gui(self, args):
+        try:
+            DSPositionGUI(process=self.game).mainloop()
+        except Exception as e:
+            print("%s: %s\nCouldn't launch position GUI" % (type(e).__name__, e))
 
     @staticmethod
     def help_set():

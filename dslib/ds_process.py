@@ -1,4 +1,5 @@
 from enum import Enum
+from math import pi
 
 
 class Stat(Enum):
@@ -166,6 +167,25 @@ class DSRProcess:
 
     def get_stamina(self):
         return self.hook.GetStaminaMax()
+
+    def get_pos(self):
+        return (
+            self.hook.GetPositionX(),
+            self.hook.GetPositionY(),
+            self.hook.GetPositionZ(),
+            (self.hook.GetPositionAngle() + pi) / (pi * 2) * 360
+        )
+
+    def get_pos_stable(self):
+        return (
+            self.hook.GetStablePositionX(),
+            self.hook.GetStablePositionY(),
+            self.hook.GetStablePositionZ(),
+            (self.hook.GetStablePositionAngle() + pi) / (pi * 2) * 360
+        )
+
+    def jump_pos(self, x, y, z, a):
+        self.hook.PosWarp(x, y, z, a)
 
     def set_bonfire(self, value: int):
         self.hook.SetLastBonfire(value)

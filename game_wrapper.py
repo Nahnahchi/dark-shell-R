@@ -1,5 +1,5 @@
 from inspect import getfile, currentframe
-from os import listdir
+from os import listdir, getenv, makedirs
 from os.path import join, dirname, isfile
 from dslib.ds_process import DSRProcess, Stat
 from dslib.ds_cmprocessor import DSRCmp
@@ -11,7 +11,16 @@ from time import sleep
 from collections import defaultdict
 
 
+save_dir = join(getenv("APPDATA"), "DarkShell", "save")
+try:
+    makedirs(save_dir)
+except FileExistsError:
+    pass
+
+
 class DarkSouls(DSRProcess):
+
+    STATIC_SOURCE = join(save_dir, "static")
 
     def __init__(self, hook):
         super(DarkSouls, self).__init__(hook)
@@ -214,6 +223,11 @@ class DarkSouls(DSRProcess):
                     print("EVENT FLAG %d %s" % (flag_id, ("enabled" if enable else "disabled")))
 
             @staticmethod
+            def static_default():
+                with open(DarkSouls.STATIC_SOURCE, "a") as static_source:
+                    static_source.write(" ".join(arguments) + "\n")
+
+            @staticmethod
             def set_speed_game():
                 speed = float(arguments[1])
                 if dark_souls.set_game_speed(speed):
@@ -330,5 +344,22 @@ class DarkSouls(DSRProcess):
                 enable = arguments[1]
                 if dark_souls.set_silence(enable):
                     print("PLAYER SILENCE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def static_list():
+                lines = open(DarkSouls.STATIC_SOURCE, "r").readlines()
+                for i in range(len(lines)):
+                    print("\t%d %s" % (i, lines[i].strip()))
+
+            @staticmethod
+            def static_remove():
+                remove_ind = int(arguments[1])
+                lines = open(DarkSouls.STATIC_SOURCE, "r").readlines()
+                del lines[remove_ind]
+                open(DarkSouls.STATIC_SOURCE, "w").writelines(lines)
+
+            @staticmethod
+            def static_clean():
+                open(DarkSouls.STATIC_SOURCE, "w").write("")
 
         Switcher.switch()
