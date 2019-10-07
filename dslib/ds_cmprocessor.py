@@ -3,7 +3,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 
 
-class DSParser:
+class DSRParser:
 
     def __init__(self, args: str):
         args = args.split()
@@ -43,7 +43,7 @@ class DSRCmp:
                     history=self.history,
                     enable_history_search=True
                 )
-                parser = DSParser(user_inp)
+                parser = DSRParser(user_inp)
                 command = parser.get_command()
                 arguments = parser.get_arguments()
                 self.execute_command(command, arguments)
@@ -65,7 +65,7 @@ class DSRCmp:
             try:
                 commands = open(source, "r").readlines()
                 for command in commands:
-                    parser = DSParser(command)
+                    parser = DSRParser(command)
                     c = parser.get_command()
                     a = parser.get_arguments()
                     self.execute_command(c, a)
@@ -85,7 +85,7 @@ class DSRCmp:
                 if name[:prefix_len] == DSRCmp.com_prefix:
                     com_name = name[prefix_len:]
                     if com_name != "default":
-                        commands.append(DSRCmp.get_method_name(prefix="", name=com_name))
+                        commands.append(com_name.replace("_", "-"))
             commands.sort()
             print("\n")
             for command in commands:

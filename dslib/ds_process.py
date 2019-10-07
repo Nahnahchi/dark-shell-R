@@ -193,5 +193,35 @@ class DSRProcess:
     def bonfire_warp(self):
         return self.hook.BonfireWarp() == 0
 
-    def item_get(self, item_category, item_id, item_count):
+    def item_get(self, item_category: int, item_id: int, item_count: int):
         return self.hook.GetItem(item_category, item_id, item_count) == 0
+
+    def override_filter(self, override: bool):
+        self.hook.SetFilterOverride(override)
+
+    def set_brightness(self, red: float, green: float, blue: float):
+        self.hook.SetBrightness(red, green, blue)
+
+    def set_contrast(self, red: float, green: float, blue: float):
+        self.hook.SetContrast(red, green, blue)
+
+    def set_saturation(self, value: float):
+        self.hook.SetSaturation(value)
+
+    def set_hue(self, value: float):
+        self.hook.SetHue(value)
+
+    def draw_map(self, enable: bool):
+        self.hook.SetDrawMap(enable)
+
+    def draw_objects(self, enable: bool):
+        self.hook.SetDrawObjects(enable)
+
+    def draw_creatures(self, enable: bool):
+        self.hook.SetDrawCharacters(enable)
+
+    def draw_sfx(self, enable: bool):
+        self.hook.SetDrawSFX(enable)
+
+    def draw_cutscenes(self, enable: bool):
+        self.hook.SetDrawCutscenes(enable)

@@ -7,7 +7,7 @@ from time import sleep
 from threading import Thread
 from game_wrapper import DarkSouls
 from dslib.ds_cmprocessor import DSRCmp
-from dslib.ds_gui import DSPositionGUI
+from dslib.ds_gui import DSRPositionGUI, DSRGraphicsGUI
 from dsres.ds_commands import DS_NEST, DS_STATIC
 dir_path = dirname(realpath(__file__))
 sys.path.append(join(dir_path, "dsprh"))
@@ -87,9 +87,15 @@ class DarkShell(DSRCmp):
 
     def do_pos_gui(self, args):
         try:
-            DSPositionGUI(process=self.game).mainloop()
+            DSRPositionGUI(process=self.game).mainloop()
         except Exception as e:
             print("%s: %s\nCouldn't launch position GUI" % (type(e).__name__, e))
+
+    def do_graphics_gui(self, args):
+        try:
+            DSRGraphicsGUI(process=self.game).mainloop()
+        except Exception as e:
+            print("%s: %s\nCouldn't launch graphics GUI" % (type(e).__name__, e))
 
     @staticmethod
     def help_set():

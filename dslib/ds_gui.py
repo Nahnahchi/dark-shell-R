@@ -14,7 +14,7 @@ except FileExistsError:
     pass
 
 
-class DSGraphicsGUI(Tk):
+class DSRGraphicsGUI(Tk):
 
     SAVE_FILE = join(save_dir, "graphics")
     SAVED_DATA = {
@@ -33,12 +33,12 @@ class DSGraphicsGUI(Tk):
 
     def __init__(self, process: DSRProcess):
 
-        super(DSGraphicsGUI, self).__init__()
+        super(DSRGraphicsGUI, self).__init__()
 
         try:
-            saved = load(open(DSGraphicsGUI.SAVE_FILE, "rb"))
+            saved = load(open(DSRGraphicsGUI.SAVE_FILE, "rb"))
         except (UnpicklingError, FileNotFoundError):
-            saved = DSGraphicsGUI.SAVED_DATA
+            saved = DSRGraphicsGUI.SAVED_DATA
 
         self.process = process
 
@@ -67,6 +67,11 @@ class DSGraphicsGUI(Tk):
         self.draw_sfx.set(True)
         Checkbutton(render, text="SFX", var=self.draw_sfx,
                     command=self.set_draw_sfx).grid(row=3, column=0, sticky="W")
+
+        self.draw_cutscenes = BooleanVar()
+        self.draw_cutscenes.set(True)
+        Checkbutton(render, text="Cutscenes", var=self.draw_cutscenes,
+                    command=self.set_draw_cutscenes).grid(row=4, column=0, sticky="W")
 
         filter_ = LabelFrame(self, text="Filter")
         filter_.pack()
@@ -146,18 +151,18 @@ class DSGraphicsGUI(Tk):
             self.set_override_filter()
 
     def save_state(self):
-        DSGraphicsGUI.SAVED_DATA["override f"] = self.override_filter.get()
-        DSGraphicsGUI.SAVED_DATA["sync br"] = self.sync_brightness.get()
-        DSGraphicsGUI.SAVED_DATA["sync co"] = self.sync_contrast.get()
-        DSGraphicsGUI.SAVED_DATA["brightness r"] = self.brightness_r.get()
-        DSGraphicsGUI.SAVED_DATA["contrast r"] = self.contrast_r.get()
-        DSGraphicsGUI.SAVED_DATA["brightness g"] = self.brightness_g.get()
-        DSGraphicsGUI.SAVED_DATA["contrast g"] = self.contrast_g.get()
-        DSGraphicsGUI.SAVED_DATA["brightness b"] = self.brightness_b.get()
-        DSGraphicsGUI.SAVED_DATA["contrast b"] = self.contrast_b.get()
-        DSGraphicsGUI.SAVED_DATA["saturation"] = self.saturation.get()
-        DSGraphicsGUI.SAVED_DATA["hue"] = self.hue.get()
-        dump(DSGraphicsGUI.SAVED_DATA, open(DSGraphicsGUI.SAVE_FILE, "wb"))
+        DSRGraphicsGUI.SAVED_DATA["override f"] = self.override_filter.get()
+        DSRGraphicsGUI.SAVED_DATA["sync br"] = self.sync_brightness.get()
+        DSRGraphicsGUI.SAVED_DATA["sync co"] = self.sync_contrast.get()
+        DSRGraphicsGUI.SAVED_DATA["brightness r"] = self.brightness_r.get()
+        DSRGraphicsGUI.SAVED_DATA["contrast r"] = self.contrast_r.get()
+        DSRGraphicsGUI.SAVED_DATA["brightness g"] = self.brightness_g.get()
+        DSRGraphicsGUI.SAVED_DATA["contrast g"] = self.contrast_g.get()
+        DSRGraphicsGUI.SAVED_DATA["brightness b"] = self.brightness_b.get()
+        DSRGraphicsGUI.SAVED_DATA["contrast b"] = self.contrast_b.get()
+        DSRGraphicsGUI.SAVED_DATA["saturation"] = self.saturation.get()
+        DSRGraphicsGUI.SAVED_DATA["hue"] = self.hue.get()
+        dump(DSRGraphicsGUI.SAVED_DATA, open(DSRGraphicsGUI.SAVE_FILE, "wb"))
 
     def set_override_filter(self):
         self.process.override_filter(self.override_filter.get())
@@ -254,12 +259,15 @@ class DSGraphicsGUI(Tk):
     def set_draw_sfx(self):
         self.process.draw_sfx(self.draw_sfx.get())
 
+    def set_draw_cutscenes(self):
+        self.process.draw_cutscenes(self.draw_cutscenes.get())
 
-class DSPositionGUI(Tk):
+
+class DSRPositionGUI(Tk):
 
     def __init__(self, process: DSRProcess):
 
-        super(DSPositionGUI, self).__init__()
+        super(DSRPositionGUI, self).__init__()
 
         self.process = process
         self.exit_flag = False
