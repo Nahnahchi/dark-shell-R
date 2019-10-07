@@ -28,6 +28,9 @@ class DSRProcess:
     def is_hooked(self):
         return self.hook.Hooked
 
+    def can_read(self):
+        return self.hook.Loaded
+
     def set_game_speed(self, value):
         return self.hook.SetAnimSpeed(value)
 
@@ -83,10 +86,82 @@ class DSRProcess:
         elif stat == Stat.HUM:
             return self.hook.SetHumanity(value)
 
+    def read_event_flag(self, flag_id: int):
+        return self.hook.ReadEventFlag(flag_id)
+
+    def write_event_flag(self, flag_id: int, state: bool):
+        return self.hook.WriteEventFlag(flag_id, state)
+
+    def death_cam(self, enable: bool):
+        return self.hook.SetDeathCam(enable)
+
+    def set_super_armor(self, enable: bool):
+        return self.hook.SetPlayerSuperArmor(enable)
+
+    def set_no_gravity(self, enable: bool):
+        return self.hook.SetNoGravity(enable)
+
+    def set_no_dead(self, enable: bool):
+        return self.hook.SetPlayerNoDead(enable)
+
+    def set_no_stamina_consume(self, enable: bool):
+        return self.hook.SetPlayerNoStamina(enable)
+
+    def set_no_goods_consume(self, enable: bool):
+        return self.hook.SetPlayerNoGoods(enable)
+
+    def set_no_damage(self, enable: bool):
+        return self.hook.SetPlayerDisableDamage(enable)
+
+    def set_no_hit(self, enable: bool):
+        return self.hook.SetPlayerNoHit(enable)
+
+    def get_player_dead_mode(self):
+        return self.hook.GetPlayerDeadMode()
+
+    def set_player_dead_mode(self, enable: bool):
+        return self.hook.SetPlayerDeadMode(enable)
+
+    def set_no_magic_all(self, enable: bool):
+        return self.hook.SetAllNoMagicQty(enable)
+
+    def set_no_stamina_all(self, enable: bool):
+        return self.hook.SetAllNoStamina(enable)
+
+    def set_exterminate(self, enable: bool):
+        return self.hook.SetPlayerExterminate(enable)
+
+    def set_no_ammo_consume_all(self, enable: bool):
+        return self.hook.SetAllNoArrow(enable)
+
+    def set_hide(self, enable: bool):
+        return self.hook.SetPlayerHide(enable)
+
+    def set_silence(self, enable: bool):
+        return self.hook.SetPlayerSilence(enable)
+
+    def set_no_dead_all(self, enable: bool):
+        return self.hook.SetAllNoDead(enable)
+
+    def set_no_damage_all(self, enable: bool):
+        return self.hook.SetAllNoDamage(enable)
+
+    def set_no_hit_all(self, enable: bool):
+        return self.hook.SetAllNoHit(enable)
+
+    def set_no_attack_all(self, enable: bool):
+        return self.hook.SetAllNoAttack(enable)
+
+    def set_no_move_all(self, enable: bool):
+        return self.hook.SetAllNoMove(enable)
+
+    def set_no_update_ai_all(self, enable: bool):
+        return self.hook.SetAllNoUpdateAI(enable)
+
     def get_hp(self):
         return self.hook.GetHealth()
 
-    def get_hp_mod_max(self):
+    def get_hp_max(self):
         return self.hook.GetHealthMax()
 
     def get_stamina(self):

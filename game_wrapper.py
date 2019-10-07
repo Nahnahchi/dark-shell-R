@@ -90,7 +90,7 @@ class DarkSouls(DSRProcess):
         return upgrade
 
     def print_stats(self):
-        print("\n\tHealth: %d/%d" % (self.get_hp(), self.get_hp_mod_max()))
+        print("\n\tHealth: %d/%d" % (self.get_hp(), self.get_hp_max()))
         print("\tStamina: %d\n" % self.get_stamina())
         for stat in vars(Stat).values():
             if isinstance(stat, Stat):
@@ -188,7 +188,7 @@ class DarkSouls(DSRProcess):
 
             @classmethod
             def switch(cls):
-                case_name = DSRCmp.get_method_name(prefix=command + "_", name=arguments[0])
+                case_name = DSRCmp.get_method_name(prefix=command+"_", name=arguments[0])
                 default = getattr(cls, command + "_default")
                 case_method = getattr(cls, case_name, default)
                 case_method()
@@ -202,16 +202,133 @@ class DarkSouls(DSRProcess):
 
             @staticmethod
             def get_default():
-                pass
+                flag_id = int(arguments[0])
+                if dark_souls.is_hooked():
+                    print("FLAG %d: %s" % (flag_id, dark_souls.read_event_flag(flag_id)))
 
             @staticmethod
-            def get_stats():
-                dark_souls.print_stats()
+            def enable_default():
+                flag_id = int(arguments[0])
+                enable = arguments[1]
+                if dark_souls.write_event_flag(flag_id, enable):
+                    print("EVENT FLAG %d %s" % (flag_id, ("enabled" if enable else "disabled")))
 
             @staticmethod
             def set_speed_game():
                 speed = float(arguments[1])
                 if dark_souls.set_game_speed(speed):
                     print("Game speed changed to %.2f" % speed)
+
+            @staticmethod
+            def get_stats():
+                dark_souls.print_stats()
+
+            @staticmethod
+            def enable_gravity():
+                enable = arguments[1]
+                if dark_souls.set_no_gravity(not enable):
+                    print("GRAVITY %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_dead():
+                enable = arguments[1]
+                if dark_souls.set_no_dead(enable):
+                    print("NO DEAD %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_stamina_consume():
+                enable = arguments[1]
+                if dark_souls.set_no_stamina_consume(enable):
+                    print("NO STAMINA CONSUME %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_goods_consume():
+                enable = arguments[1]
+                if dark_souls.set_no_goods_consume(enable):
+                    print("NO GOODS CONSUME %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_damage():
+                enable = arguments[1]
+                if dark_souls.set_no_damage(enable):
+                    print("NO DAMAGE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_hit():
+                enable = arguments[1]
+                if dark_souls.set_no_hit(enable):
+                    print("NO HIT %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_magic_all():
+                enable = arguments[1]
+                if dark_souls.set_no_magic_all(enable):
+                    print("NO MAGIC ALL %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_ammo_consume_all():
+                enable = arguments[1]
+                if dark_souls.set_no_ammo_consume_all(enable):
+                    print("NO AMMO CONSUME ALL %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_dead_all():
+                enable = arguments[1]
+                if dark_souls.set_no_dead_all(enable):
+                    print("NO DEAD ALL %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_damage_all():
+                enable = arguments[1]
+                if dark_souls.set_no_damage_all(enable):
+                    print("NO DAMAGE ALL %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_hit_all():
+                enable = arguments[1]
+                if dark_souls.set_no_hit_all(enable):
+                    print("NO HIT ALL %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_attack_all():
+                enable = arguments[1]
+                if dark_souls.set_no_attack_all(enable):
+                    print("NO ATTACK ALL %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_move_all():
+                enable = arguments[1]
+                if dark_souls.set_no_move_all(enable):
+                    print("NO MOVE ALL %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_death_cam():
+                enable = arguments[1]
+                if dark_souls.death_cam(enable):
+                    print("DEATH CAM %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_player_dead_mode():
+                enable = arguments[1]
+                if dark_souls.set_player_dead_mode(enable):
+                    print("PLAYER DEAD MODE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_player_exterminate():
+                enable = arguments[1]
+                if dark_souls.set_exterminate(enable):
+                    print("PLAYER EXTERMINATE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_player_hide():
+                enable = arguments[1]
+                if dark_souls.set_hide(enable):
+                    print("PLAYER HIDE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_player_silence():
+                enable = arguments[1]
+                if dark_souls.set_silence(enable):
+                    print("PLAYER SILENCE %s" % ("enabled" if enable else "disabled"))
 
         Switcher.switch()

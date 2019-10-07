@@ -72,6 +72,34 @@ class DarkShell(DSRCmp):
             print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
 
     @staticmethod
+    def help_enable():
+        print("\nUsage:\tenable [option/flag-id]")
+        print("\nOptions:")
+        for opt in DS_NEST["enable"].keys():
+            print("\t%s" % opt)
+        print("\n")
+
+    def do_enable(self, args):
+        try:
+            self.game.switch(command="enable", arguments=args+[True])
+        except Exception as e:
+            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+
+    @staticmethod
+    def help_disable():
+        print("\nUsage:\tdisable [option/flag-id]")
+        print("\nOptions:")
+        for opt in DS_NEST["disable"].keys():
+            print("\t%s" % opt)
+        print("\n")
+
+    def do_disable(self, args):
+        try:
+            self.game.switch(command="enable", arguments=args+[False])
+        except Exception as e:
+            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+
+    @staticmethod
     def help_item_get():
         print("\nUsage:\titem-get [item-name [count]]\n")
 
