@@ -869,20 +869,6 @@ DS_BOOL = {
     "player-exterminate": None,
     "player-hide": None,
     "player-silence": None,
-    "event": None,
-    "npc": None,
-    "map": None,
-    "obj": None,
-    "obj-break": None,
-    "hi-hit": None,
-    "lo-hit": None,
-    "sfx": None,
-    "sound": None,
-    "obj-break-record-mode": None,
-    "auto-map-warp-mode": None,
-    "chr-npc-wander-test": None,
-    "dbg-chr-all-dead": None,
-    "online-mode": None
 }
 
 DS_STATIC = {
@@ -923,7 +909,6 @@ DS_NEST = {
     "exit": None,
     "quit": None,
     "end": None,
-    "game-restart": None,
     "menu-kick": None,
     "pos-gui": None,
     "graphics-gui": None,
