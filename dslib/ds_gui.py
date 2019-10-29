@@ -7,7 +7,7 @@ from time import sleep
 from pickle import dump, load, UnpicklingError
 
 
-save_dir = join(getenv("APPDATA"), "DarkShell", "save")
+save_dir = join(getenv("APPDATA"), "DarkShellR", "save")
 try:
     makedirs(save_dir)
 except FileExistsError:

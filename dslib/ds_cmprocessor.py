@@ -1,6 +1,7 @@
 from prompt_toolkit.completion import NestedCompleter
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
+from time import sleep
 
 
 class DSRParser:
@@ -62,6 +63,7 @@ class DSRCmp:
 
     def execute_source(self, source):
         if source is not None:
+            sleep(5)
             try:
                 commands = open(source, "r").readlines()
                 for command in commands:

@@ -11,9 +11,9 @@ from dslib.ds_gui import DSRPositionGUI, DSRGraphicsGUI
 from dsres.ds_commands import DS_NEST, DS_STATIC
 dir_path = dirname(realpath(__file__))
 sys.path.append(join(dir_path, "dsprh"))
-clr.AddReference("DSRInterface")
+clr.AddReference("GameHook")
 # noinspection PyUnresolvedReferences
-from DSRInterface import DSRHook
+from DarkShellRemastered import DSRHook
 
 
 class DarkShell(DSRCmp):
@@ -59,7 +59,7 @@ class DarkShell(DSRCmp):
         _exit(0)
 
     def do_begin(self, args):
-        self.execute_source(self.game.STATIC_SOURCE)
+        pass
 
     @staticmethod
     def help_static():
@@ -204,7 +204,8 @@ class DarkShell(DSRCmp):
 
 
 if __name__ == "__main__":
+    DarkSouls.warn_anticheat()
     source = argv[1] if len(argv) > 1 else None
     if source is None:
-        print("Welcome to Dark Shell R")
+        print("Welcome to Dark Shell")
     DarkShell(hook=DSRHook(5000, 5000), script=source).cmp_loop()

@@ -850,10 +850,8 @@ DS_BOOL = {
     "no-dead-all": None,
     "no-goods-consume": None,
     "no-stamina-consume": None,
-    "no-update": None,
     "no-attack": None,
     "no-attack-all": None,
-    "no-move": None,
     "no-move-all": None,
     "no-hit": None,
     "no-hit-all": None,
@@ -869,6 +867,20 @@ DS_BOOL = {
     "player-exterminate": None,
     "player-hide": None,
     "player-silence": None,
+    "event": None,
+    "npc": None,
+    "map": None,
+    "obj": None,
+    "obj-break": None,
+    "hi-hit": None,
+    "lo-hit": None,
+    "sfx": None,
+    "sound": None,
+    "obj-break-record-mode": None,
+    "auto-map-warp-mode": None,
+    "chr-npc-wander-test": None,
+    "dbg-chr-all-dead": None,
+    "online-mode": None
 }
 
 DS_STATIC = {
@@ -877,22 +889,7 @@ DS_STATIC = {
     "remove": None,
     "set": {
         "speed-game": None,
-        "phantom-type": None,
-        "team-type": None,
-        "ng": None,
         "name": None,
-        "covenant": {
-            "none": None,
-            "way-of-white": None,
-            "princess's-guard": None,
-            "warrior-of-sunlight": None,
-            "darkwraith": None,
-            "path-of-the-gragon": None,
-            "gravelord-servant": None,
-            "forest-hunter": None,
-            "darkmoon-blade": None,
-            "chaos-servant": None
-        }
     },
     "get": {
         "stats": None,

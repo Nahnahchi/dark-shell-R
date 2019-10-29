@@ -162,11 +162,17 @@ class DSRProcess:
     def get_hp(self):
         return self.hook.GetHealth()
 
+    def set_hp(self, value: int):
+        return self.hook.SetHealthMax(value)
+
     def get_hp_max(self):
         return self.hook.GetHealthMax()
 
     def get_stamina(self):
         return self.hook.GetStaminaMax()
+
+    def set_stamina(self, value: int):
+        return self.hook.SetStaminaMax(value)
 
     def get_pos(self):
         return (
@@ -186,6 +192,9 @@ class DSRProcess:
 
     def jump_pos(self, x, y, z, a):
         self.hook.PosWarp(x, y, z, a)
+
+    def set_name(self, name: str):
+        return self.hook.SetName(name)
 
     def set_bonfire(self, value: int):
         self.hook.SetLastBonfire(value)
@@ -225,3 +234,48 @@ class DSRProcess:
 
     def draw_cutscenes(self, enable: bool):
         self.hook.SetDrawCutscenes(enable)
+
+    def disable_all_area_enemies(self, disable: bool):
+        return self.hook.DisableAllAreaEnemies(disable)
+
+    def disable_all_area_event(self, disable: bool):
+        return self.hook.DisableAllAreaEvent(disable)
+
+    def disable_all_area_map(self, disable: bool):
+        return self.hook.DisableAllAreaMap(disable)
+
+    def disable_all_area_obj(self, disable: bool):
+        return self.hook.DisableAllAreaObj(disable)
+
+    def enable_all_area_obj(self, enable: bool):
+        return self.hook.EnableAllAreaObj(enable)
+
+    def enable_all_area_obj_break(self, enable: bool):
+        return self.hook.EnableAllAreaObjBreak(enable)
+
+    def disable_all_area_hi_hit(self, disable: bool):
+        return self.hook.DisableAllAreaHiHit(disable)
+
+    def disable_all_area_lo_hit(self, disable: bool):
+        return self.hook.EnableAllAreaLoHit(not disable)
+
+    def disable_all_area_sfx(self, disable: bool):
+        return self.hook.DisableAllAreaSfx(disable)
+
+    def disable_all_area_sound(self, disable: bool):
+        return self.hook.DisableAllAreaSound(disable)
+
+    def enable_obj_break_record_mode(self, enable: bool):
+        return self.hook.EnableObjBreakRecordMode(enable)
+
+    def enable_auto_map_warp_mode(self, enable: bool):
+        return self.hook.EnableAutoMapWarpMode(enable)
+
+    def enable_chr_npc_wander_test(self, enable: bool):
+        return self.hook.EnableChrNpcWanderTest(enable)
+
+    def enable_dbg_chr_all_dead(self, enable: bool):
+        return self.hook.EnableDbgChrAllDead(enable)
+
+    def enable_online_mode(self, enable: bool):
+        return self.hook.EnableOnlineMode(enable)

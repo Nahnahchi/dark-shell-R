@@ -11,7 +11,7 @@ setup(
     description='A command line tool for testing and debugging DARK SOULS REMASTERED',
     python_requires=">=3.7",
     install_requires=[
-        "prompt-toolkit>=3.0.0"
+        "prompt-toolkit>=3.0.0", "pythonnet"
     ],
     dependency_links=[
         "https://github.com/prompt-toolkit/python-prompt-toolkit/tarball/master#egg=prompt-toolkit-3.0.0"

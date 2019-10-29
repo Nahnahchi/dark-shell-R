@@ -5,13 +5,13 @@ from dslib.ds_process import DSRProcess, Stat
 from dslib.ds_cmprocessor import DSRCmp
 from dsobj.ds_bonfire import DSRBonfire
 from dsobj.ds_item import DSRItem, DSRInfusion, Upgrade, infuse
-from prompt_toolkit.shortcuts import set_title, input_dialog, radiolist_dialog
+from prompt_toolkit.shortcuts import set_title, input_dialog, radiolist_dialog, message_dialog, yes_no_dialog
 from threading import Thread
 from time import sleep
 from collections import defaultdict
 
 
-save_dir = join(getenv("APPDATA"), "DarkShell", "save")
+save_dir = join(getenv("APPDATA"), "DarkShellR", "save")
 try:
     makedirs(save_dir)
 except FileExistsError:
@@ -44,6 +44,20 @@ class DarkSouls(DSRProcess):
         except ValueError:
             print("Wrong arguments: %s" % stat_name)
             return False
+
+    @staticmethod
+    def warn_anticheat():
+        message_dialog(
+            title="WARNING",
+            text="Dark Souls Remastered has an anti-cheat system.\nDo not use this online!"
+        ).run()
+
+    @staticmethod
+    def warn_disable_npc():
+        return yes_no_dialog(
+            title="Warning",
+            text="This command will kill all NPCs in the area.\nDo you want to proceed?"
+        ).run()
 
     @staticmethod
     def get_item_name_and_count(args: list):
@@ -234,6 +248,24 @@ class DarkSouls(DSRProcess):
                     print("Game speed changed to %.2f" % speed)
 
             @staticmethod
+            def set_hp():
+                hp = int(arguments[1])
+                if dark_souls.set_hp(hp):
+                    print("HP set to %d" % hp)
+
+            @staticmethod
+            def set_stamina():
+                stamina = int(arguments[1])
+                if dark_souls.set_stamina(stamina):
+                    print("Stamina set to %d" % stamina)
+
+            @staticmethod
+            def set_name():
+                name = " ".join(arguments[1:])
+                if dark_souls.set_name(name):
+                    print("Name set to '%s'" % name)
+
+            @staticmethod
             def get_stats():
                 dark_souls.print_stats()
 
@@ -344,6 +376,93 @@ class DarkSouls(DSRProcess):
                 enable = arguments[1]
                 if dark_souls.set_silence(enable):
                     print("PLAYER SILENCE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_event():
+                enable = arguments[1]
+                if dark_souls.disable_all_area_event(not enable):
+                    print("ALL AREA EVENT %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_npc():
+                enable = arguments[1]
+                if not enable:
+                    if not dark_souls.warn_disable_npc():
+                        return
+                if dark_souls.disable_all_area_enemies(not enable):
+                    print("ALL AREA ENEMIES %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_map():
+                enable = arguments[1]
+                if dark_souls.disable_all_area_map(not enable):
+                    print("ALL AREA MAP %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_obj():
+                enable = arguments[1]
+                if dark_souls.disable_all_area_obj(not enable):
+                    print("ALL AREA OBJ %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_obj_break():
+                enable = arguments[1]
+                if dark_souls.enable_all_area_obj_break(enable):
+                    print("ALL AREA OBJ BREAK %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_hi_hit():
+                enable = arguments[1]
+                if dark_souls.disable_all_area_hi_hit(not enable):
+                    print("ALL AREA HI HIT %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_lo_hit():
+                enable = arguments[1]
+                if dark_souls.disable_all_area_lo_hit(not enable):
+                    print("ALL AREA LO HIT %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_sfx():
+                enable = arguments[1]
+                if dark_souls.disable_all_area_sfx(not enable):
+                    print("ALL AREA SFX %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_sound():
+                enable = arguments[1]
+                if dark_souls.disable_all_area_sound(not enable):
+                    print("ALL AREA SOUND %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_obj_break_record_mode():
+                enable = arguments[1]
+                if dark_souls.enable_obj_break_record_mode(enable):
+                    print("OBJ BREAK RECORD MODE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_auto_map_warp_mode():
+                enable = arguments[1]
+                if dark_souls.enable_auto_map_warp_mode(enable):
+                    print("AUTO MAP WARP MODE %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_chr_npc_wander_test():
+                enable = arguments[1]
+                if dark_souls.enable_chr_npc_wander_test(enable):
+                    print("CHR NPC WANDER TEST %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_dbg_chr_all_dead():
+                enable = arguments[1]
+                if dark_souls.enable_dbg_chr_all_dead(enable):
+                    print("DBG CHR ALL DEAD %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_online_mode():
+                enable = arguments[1]
+                if dark_souls.enable_online_mode(enable):
+                    print("ONLINE MODE %s" % ("enabled" if enable else "disabled"))
 
             @staticmethod
             def static_list():
