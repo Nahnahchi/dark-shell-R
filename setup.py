@@ -9,7 +9,7 @@ setup(
     author='Nahnahchi',
     author_email='sawalozb@gmail.com',
     description='A command line tool for testing and debugging DARK SOULS REMASTERED',
-    python_requires=">=3.7",
+    python_requires="==3.7",
     install_requires=[
         "prompt-toolkit>=3.0.0", "pythonnet"
     ],

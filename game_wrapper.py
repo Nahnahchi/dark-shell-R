@@ -21,6 +21,7 @@ except FileExistsError:
 class DarkSouls(DSRProcess):
 
     STATIC_SOURCE = join(save_dir, "static")
+    ITEM_CATEGORIES = {"weapon": 0, "good": 0, "ring": 0, "armor": 0}
 
     def __init__(self, hook):
         super(DarkSouls, self).__init__(hook)
@@ -143,6 +144,13 @@ class DarkSouls(DSRProcess):
             else:
                 print("Failed to create item")
 
+    def create_custom_item(self, i_cat, i_id, i_count):
+        self.read_categories()
+        if self.item_get(i_cat, i_id, i_count):
+            print("Created new item, ID: %s" % i_id)
+        else:
+            print("Failed to create item")
+
     def upgrade_item(self, i_name: str, i_count: int):
         if i_name not in self.items.keys():
             print("Item '%s' doesn't exist!" % i_name)
@@ -202,6 +210,12 @@ class DarkSouls(DSRProcess):
         for i in infusions:
             infusion = DSRInfusion(i.strip())
             self.infusions[infusion.get_name()] = infusion
+
+    def read_categories(self):
+        DarkSouls.ITEM_CATEGORIES["weapon"] = self.items["dagger"].get_category()
+        DarkSouls.ITEM_CATEGORIES["good"] = self.items["estus-flask"].get_category()
+        DarkSouls.ITEM_CATEGORIES["ring"] = self.items["wolf-ring"].get_category()
+        DarkSouls.ITEM_CATEGORIES["armor"] = self.items["standard-helm"].get_category()
 
     def switch(self, command: str, arguments: list):
 

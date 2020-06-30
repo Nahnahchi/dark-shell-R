@@ -158,9 +158,13 @@ class DarkShell(DSRCmp):
     @staticmethod
     def help_item_get():
         print("\nUsage:\titem-get [item-name [count]]\n")
+        print("\titem-get [category-name] [item-ID] [count]\n")
 
     def do_item_get(self, args):
         try:
+            if args[0] in DarkSouls.ITEM_CATEGORIES:
+                self.game.create_custom_item(DarkSouls.ITEM_CATEGORIES[args[0]], args[1], args[2])
+                return
             i_name, i_count = DarkSouls.get_item_name_and_count(args)
             if i_count > 0:
                 self.game.create_item(i_name, i_count, func=self.game.item_get)

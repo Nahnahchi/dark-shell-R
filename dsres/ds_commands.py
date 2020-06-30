@@ -1,4 +1,8 @@
 DS_ITEM = {
+    "weapon": None,
+    "armor": None,
+    "good": None,
+    "ring": None,
     "catarina-helm": None,
     "catarina-armor": None,
     "catarina-gauntlets": None,
