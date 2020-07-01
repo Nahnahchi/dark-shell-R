@@ -298,7 +298,7 @@ class DSRPositionGUI(Tk):
         Entry(self, width=10, state="readonly", textvariable=self.y_stable).grid(column=3, row=4)
         self.y_stored = StringVar()
         self.y_stored.set(process.get_pos_stable()[1])
-        Spinbox(self, from_=-1000, to=1000, format="%.3f", width=10, textvariable=self.y_stored).grid(column=4, row=4)
+        Spinbox(self, from_=-9999, to=9999, format="%.3f", width=10, textvariable=self.y_stored).grid(column=4, row=4)
 
         self.z_current = StringVar()
         Entry(self, width=10, state="readonly", textvariable=self.z_current).grid(column=2, row=5)
@@ -306,7 +306,7 @@ class DSRPositionGUI(Tk):
         Entry(self, width=10, state="readonly", textvariable=self.z_stable).grid(column=3, row=5)
         self.z_stored = StringVar()
         self.z_stored.set(process.get_pos_stable()[2])
-        Spinbox(self, from_=-1000, to=1000, format="%.3f", width=10, textvariable=self.z_stored).grid(column=4, row=5)
+        Spinbox(self, from_=-9999, to=9999, format="%.3f", width=10, textvariable=self.z_stored).grid(column=4, row=5)
 
         self.a_current = StringVar()
         Entry(self, width=10, state="readonly", textvariable=self.a_current).grid(column=2, row=6)
@@ -331,7 +331,7 @@ class DSRPositionGUI(Tk):
             self.z_stable.set("%.3f" % self.process.get_pos_stable()[2])
             self.a_current.set("%.3f" % self.process.get_pos()[3])
             self.a_stable.set("%.3f" % self.process.get_pos_stable()[3])
-            sleep(0.2)
+            sleep(0.1)
 
     def store(self):
         self.x_stored.set(self.x_current.get())

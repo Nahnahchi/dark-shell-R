@@ -36,11 +36,11 @@ class DarkShell(DSRCmp):
                     self.execute_source(self.game.STATIC_SOURCE)
                     execute = False
                 else:
-                    sleep(1)
+                    sleep(0.1)
                     continue
             if not self.game.can_read():
                 execute = True
-            sleep(1)
+            sleep(0.1)
 
     @staticmethod
     def do_clear(args):

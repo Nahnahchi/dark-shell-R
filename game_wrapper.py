@@ -284,6 +284,18 @@ class DarkSouls(DSRProcess):
                 dark_souls.print_stats()
 
             @staticmethod
+            def enable_super_armor():
+                enable = arguments[1]
+                if dark_souls.set_super_armor(enable):
+                    print("SUPER ARMOR %s" % ("enabled" if enable else "disabled"))
+
+            @staticmethod
+            def enable_no_update_ai():
+                enable = arguments[1]
+                if dark_souls.set_no_update_ai_all(enable):
+                    print("AI %s" % ("enabled" if not enable else "disabled"))
+
+            @staticmethod
             def enable_gravity():
                 enable = arguments[1]
                 if dark_souls.set_no_gravity(not enable):

@@ -936,7 +936,7 @@ DS_NEST = {
             "bridge-bonfire": None,
             "swamp-bonfire": None
         },
-        "chasm-of-the abyss": {
+        "chasm-of-the-abyss": {
             "manus": None
         },
         "crystal-cave": {
