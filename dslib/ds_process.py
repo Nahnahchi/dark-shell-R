@@ -1,8 +1,41 @@
 from enum import Enum
 from math import pi
+# noinspection PyUnresolvedReferences
+from dsprh.ds_imports import DSRHook
 
 
-class Stat(Enum):
+class ReadMemoryError(Exception):
+
+    def __init__(self, message="Failed to read memory"):
+        self.message = message
+        super(ReadMemoryError, self).__init__(self.message)
+
+
+class WriteMemoryError(Exception):
+
+    def __init__(self, message="Failed to write memory"):
+        self.message = message
+        super(WriteMemoryError, self).__init__(self.message)
+
+
+class AsmExecuteError(Exception):
+
+    ERR = {
+        0x00000080: "WAIT_ABANDONED",
+        0x00000102: "WAIT_TIMEOUT",
+        0xFFFFFFFF: "WAIT_FAILED"
+    }
+
+    def __init__(self, code, message="Failed to execute assembly"):
+        self.message = message
+        self.error = AsmExecuteError.ERR[code] if code in AsmExecuteError.ERR.keys() else "REASON_UNKNOWN"
+        super(AsmExecuteError, self).__init__(self.message)
+
+    def __str__(self):
+        return "%s (%s)" % (self.message, self.error)
+
+
+class Stats(Enum):
 
     VIT = "vit"
     ATN = "atn"
@@ -19,8 +52,11 @@ class Stat(Enum):
 
 class DSRProcess:
 
-    def __init__(self, hook):
-        self.hook = hook
+    def __init__(self, process_name, debug=False):
+        self.hook = DSRHook(self, 5000, 5000, process_name)
+        self.debug = debug
+        self.hook.OnHooked += lambda caller, *e: self.hook.DSRHook_OnHooked()
+        self.hook.OnHooked += lambda caller, *e: getattr(self, "update_version", lambda: None)()
         self.hook.Start()
 
     def get_version(self):
@@ -33,146 +69,180 @@ class DSRProcess:
         return self.hook.Loaded
 
     def set_game_speed(self, value):
-        return self.hook.SetAnimSpeed(value)
+        if not self.hook.SetAnimSpeed(value):
+            raise WriteMemoryError()
 
-    def get_stat(self, stat: Stat):
-        if stat == Stat.VIT:
+    def get_stat(self, stat: Stats):
+        if stat == Stats.VIT:
             return self.hook.GetVitality()
-        elif stat == Stat.ATN:
+        elif stat == Stats.ATN:
             return self.hook.GetAttunement()
-        elif stat == Stat.END:
+        elif stat == Stats.END:
             return self.hook.GetEndurance()
-        elif stat == Stat.STR:
+        elif stat == Stats.STR:
             return self.hook.GetStrength()
-        elif stat == Stat.DEX:
+        elif stat == Stats.DEX:
             return self.hook.GetDexterity()
-        elif stat == Stat.RES:
+        elif stat == Stats.RES:
             return self.hook.GetResistance()
-        elif stat == Stat.INT:
+        elif stat == Stats.INT:
             return self.hook.GetIntelligence()
-        elif stat == Stat.FTH:
+        elif stat == Stats.FTH:
             return self.hook.GetFaith()
-        elif stat == Stat.SLV:
+        elif stat == Stats.SLV:
             return self.hook.GetSoulLevel()
-        elif stat == Stat.SLS:
+        elif stat == Stats.SLS:
             return self.hook.GetSouls()
-        elif stat == Stat.HUM:
+        elif stat == Stats.HUM:
             return self.hook.GetHumanity()
 
-    def update_sl(self, stat: Stat, new_val: int):
+    def update_sl(self, stat: Stats, new_val: int):
         old_val = self.get_stat(stat)
         return self.hook.SetSoulLevel(self.hook.GetSoulLevel() + (new_val - old_val))
 
-    def set_stat(self, stat: Stat, value: int):
-        if stat == Stat.VIT:
+    def set_stat(self, stat: Stats, value: int):
+        if stat == Stats.VIT:
             return self.update_sl(stat, value) and self.hook.SetVitality(value)
-        elif stat == Stat.ATN:
+        elif stat == Stats.ATN:
             return self.update_sl(stat, value) and self.hook.SetAttunement(value)
-        elif stat == Stat.END:
+        elif stat == Stats.END:
             return self.update_sl(stat, value) and self.hook.SetEndurance(value)
-        elif stat == Stat.STR:
+        elif stat == Stats.STR:
             return self.update_sl(stat, value) and self.hook.SetStrength(value)
-        elif stat == Stat.DEX:
+        elif stat == Stats.DEX:
             return self.update_sl(stat, value) and self.hook.SetDexterity(value)
-        elif stat == Stat.RES:
+        elif stat == Stats.RES:
             return self.update_sl(stat, value) and self.hook.SetResistance(value)
-        elif stat == Stat.INT:
+        elif stat == Stats.INT:
             return self.update_sl(stat, value) and self.hook.SetIntelligence(value)
-        elif stat == Stat.FTH:
+        elif stat == Stats.FTH:
             return self.update_sl(stat, value) and self.hook.SetFaith(value)
-        elif stat == Stat.SLV:
+        elif stat == Stats.SLV:
             return self.hook.SetSoulLevel(value)
-        elif stat == Stat.SLS:
+        elif stat == Stats.SLS:
             return self.hook.SetSouls(value)
-        elif stat == Stat.HUM:
+        elif stat == Stats.HUM:
             return self.hook.SetHumanity(value)
 
     def read_event_flag(self, flag_id: int):
+        if not self.is_hooked():
+            raise ReadMemoryError()
         return self.hook.ReadEventFlag(flag_id)
 
     def write_event_flag(self, flag_id: int, state: bool):
-        return self.hook.WriteEventFlag(flag_id, state)
+        if not self.hook.WriteEventFlag(flag_id, state):
+            raise WriteMemoryError()
 
     def death_cam(self, enable: bool):
-        return self.hook.SetDeathCam(enable)
+        if not self.hook.SetDeathCam(enable):
+            raise WriteMemoryError()
 
     def set_super_armor(self, enable: bool):
-        return self.hook.SetPlayerSuperArmor(enable)
+        if not self.hook.SetPlayerSuperArmor(enable):
+            raise WriteMemoryError()
 
     def set_no_gravity(self, enable: bool):
-        return self.hook.SetNoGravity(enable)
+        if not self.hook.SetNoGravity(enable):
+            raise WriteMemoryError()
 
     def set_no_dead(self, enable: bool):
-        return self.hook.SetPlayerNoDead(enable)
+        if not self.hook.SetPlayerNoDead(enable):
+            raise WriteMemoryError()
 
     def set_no_stamina_consume(self, enable: bool):
-        return self.hook.SetPlayerNoStamina(enable)
+        if not self.hook.SetPlayerNoStamina(enable):
+            raise WriteMemoryError()
 
     def set_no_goods_consume(self, enable: bool):
-        return self.hook.SetPlayerNoGoods(enable)
+        if not self.hook.SetPlayerNoGoods(enable):
+            raise WriteMemoryError()
 
     def set_no_damage(self, enable: bool):
-        return self.hook.SetPlayerDisableDamage(enable)
+        if not self.hook.SetPlayerDisableDamage(enable):
+            raise WriteMemoryError()
 
     def set_no_hit(self, enable: bool):
-        return self.hook.SetPlayerNoHit(enable)
+        if not self.hook.SetPlayerNoHit(enable):
+            raise WriteMemoryError()
 
     def get_player_dead_mode(self):
-        return self.hook.GetPlayerDeadMode()
+        if not self.hook.GetPlayerDeadMode():
+            raise WriteMemoryError()
 
     def set_player_dead_mode(self, enable: bool):
-        return self.hook.SetPlayerDeadMode(enable)
+        if not self.hook.SetPlayerDeadMode(enable):
+            raise WriteMemoryError()
 
     def set_no_magic_all(self, enable: bool):
-        return self.hook.SetAllNoMagicQty(enable)
+        if not self.hook.SetAllNoMagicQty(enable):
+            raise WriteMemoryError()
 
     def set_no_stamina_all(self, enable: bool):
-        return self.hook.SetAllNoStamina(enable)
+        if not self.hook.SetAllNoStamina(enable):
+            raise WriteMemoryError()
 
     def set_exterminate(self, enable: bool):
-        return self.hook.SetPlayerExterminate(enable)
+        if not self.hook.SetPlayerExterminate(enable):
+            raise WriteMemoryError()
 
     def set_no_ammo_consume_all(self, enable: bool):
-        return self.hook.SetAllNoArrow(enable)
+        if not self.hook.SetAllNoArrow(enable):
+            raise WriteMemoryError()
 
     def set_hide(self, enable: bool):
-        return self.hook.SetPlayerHide(enable)
+        if not self.hook.SetPlayerHide(enable):
+            raise WriteMemoryError()
 
     def set_silence(self, enable: bool):
-        return self.hook.SetPlayerSilence(enable)
+        if not self.hook.SetPlayerSilence(enable):
+            raise WriteMemoryError()
 
     def set_no_dead_all(self, enable: bool):
-        return self.hook.SetAllNoDead(enable)
+        if not self.hook.SetAllNoDead(enable):
+            raise WriteMemoryError()
 
     def set_no_damage_all(self, enable: bool):
-        return self.hook.SetAllNoDamage(enable)
+        if not self.hook.SetAllNoDamage(enable):
+            raise WriteMemoryError()
 
     def set_no_hit_all(self, enable: bool):
-        return self.hook.SetAllNoHit(enable)
+        if not self.hook.SetAllNoHit(enable):
+            raise WriteMemoryError()
 
     def set_no_attack_all(self, enable: bool):
-        return self.hook.SetAllNoAttack(enable)
+        if not self.hook.SetAllNoAttack(enable):
+            raise WriteMemoryError()
 
     def set_no_move_all(self, enable: bool):
-        return self.hook.SetAllNoMove(enable)
+        if not self.hook.SetAllNoMove(enable):
+            raise WriteMemoryError()
 
     def set_no_update_ai_all(self, enable: bool):
-        return self.hook.SetAllNoUpdateAI(enable)
+        if not self.hook.SetAllNoUpdateAI(enable):
+            raise WriteMemoryError()
 
     def get_hp(self):
+        if not self.is_hooked():
+            raise ReadMemoryError()
         return self.hook.GetHealth()
 
     def set_hp(self, value: int):
-        return self.hook.SetHealthMax(value)
+        if not self.hook.SetHealthMax(value):
+            raise WriteMemoryError()
 
     def get_hp_max(self):
+        if not self.is_hooked():
+            raise ReadMemoryError()
         return self.hook.GetHealthMax()
 
     def get_stamina(self):
+        if not self.is_hooked():
+            raise ReadMemoryError()
         return self.hook.GetStaminaMax()
 
     def set_stamina(self, value: int):
-        return self.hook.SetStaminaMax(value)
+        if not self.hook.SetStaminaMax(value):
+            raise WriteMemoryError()
 
     def get_pos(self):
         return (
@@ -194,16 +264,22 @@ class DSRProcess:
         self.hook.PosWarp(x, y, z, a)
 
     def set_name(self, name: str):
-        return self.hook.SetName(name)
+        if not self.hook.SetName(name):
+            raise WriteMemoryError()
 
     def set_bonfire(self, value: int):
-        self.hook.SetLastBonfire(value)
+        if not self.hook.SetLastBonfire(value):
+            raise WriteMemoryError()
 
     def bonfire_warp(self):
-        return self.hook.BonfireWarp() == 0
+        code = self.hook.BonfireWarp()
+        if code != 0:
+            raise AsmExecuteError(code)
 
     def item_get(self, item_category: int, item_id: int, item_count: int):
-        return self.hook.GetItem(item_category, item_id, item_count) == 0
+        code = self.hook.GetItem(item_category, item_id, item_count)
+        if code != 0:
+            raise AsmExecuteError(code)
 
     def override_filter(self, override: bool):
         self.hook.SetFilterOverride(override)
@@ -236,46 +312,61 @@ class DSRProcess:
         self.hook.SetDrawCutscenes(enable)
 
     def disable_all_area_enemies(self, disable: bool):
-        return self.hook.DisableAllAreaEnemies(disable)
+        if not self.hook.DisableAllAreaEnemies(disable):
+            raise WriteMemoryError()
 
     def disable_all_area_event(self, disable: bool):
-        return self.hook.DisableAllAreaEvent(disable)
+        if not self.hook.DisableAllAreaEvent(disable):
+            raise WriteMemoryError()
 
     def disable_all_area_map(self, disable: bool):
-        return self.hook.DisableAllAreaMap(disable)
+        if not self.hook.DisableAllAreaMap(disable):
+            raise WriteMemoryError()
 
     def disable_all_area_obj(self, disable: bool):
-        return self.hook.DisableAllAreaObj(disable)
+        if not self.hook.DisableAllAreaObj(disable):
+            raise WriteMemoryError()
 
     def enable_all_area_obj(self, enable: bool):
-        return self.hook.EnableAllAreaObj(enable)
+        if not self.hook.EnableAllAreaObj(enable):
+            raise WriteMemoryError()
 
     def enable_all_area_obj_break(self, enable: bool):
-        return self.hook.EnableAllAreaObjBreak(enable)
+        if not self.hook.EnableAllAreaObjBreak(enable):
+            raise WriteMemoryError()
 
     def disable_all_area_hi_hit(self, disable: bool):
-        return self.hook.DisableAllAreaHiHit(disable)
+        if not self.hook.DisableAllAreaHiHit(disable):
+            raise WriteMemoryError()
 
     def disable_all_area_lo_hit(self, disable: bool):
-        return self.hook.EnableAllAreaLoHit(not disable)
+        if not self.hook.EnableAllAreaLoHit(not disable):
+            raise WriteMemoryError()
 
     def disable_all_area_sfx(self, disable: bool):
-        return self.hook.DisableAllAreaSfx(disable)
+        if not self.hook.DisableAllAreaSfx(disable):
+            raise WriteMemoryError()
 
     def disable_all_area_sound(self, disable: bool):
-        return self.hook.DisableAllAreaSound(disable)
+        if not self.hook.DisableAllAreaSound(disable):
+            raise WriteMemoryError()
 
     def enable_obj_break_record_mode(self, enable: bool):
-        return self.hook.EnableObjBreakRecordMode(enable)
+        if not self.hook.EnableObjBreakRecordMode(enable):
+            raise WriteMemoryError()
 
     def enable_auto_map_warp_mode(self, enable: bool):
-        return self.hook.EnableAutoMapWarpMode(enable)
+        if not self.hook.EnableAutoMapWarpMode(enable):
+            raise WriteMemoryError()
 
     def enable_chr_npc_wander_test(self, enable: bool):
-        return self.hook.EnableChrNpcWanderTest(enable)
+        if not self.hook.EnableChrNpcWanderTest(enable):
+            raise WriteMemoryError()
 
     def enable_dbg_chr_all_dead(self, enable: bool):
-        return self.hook.EnableDbgChrAllDead(enable)
+        if not self.hook.EnableDbgChrAllDead(enable):
+            raise WriteMemoryError()
 
     def enable_online_mode(self, enable: bool):
-        return self.hook.EnableOnlineMode(enable)
+        if not self.hook.EnableOnlineMode(enable):
+            raise WriteMemoryError()

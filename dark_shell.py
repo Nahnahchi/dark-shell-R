@@ -1,101 +1,103 @@
-import clr
-import sys
 from sys import argv
 from os import _exit, system
-from os.path import dirname, realpath, join
-from time import sleep
 from threading import Thread
-from game_wrapper import DarkSouls
-from dslib.ds_cmprocessor import DSRCmp
+from dslib.ds_wrapper import DarkSouls
+from dslib.ds_cmd import DSRCmd
 from dslib.ds_gui import DSRPositionGUI, DSRGraphicsGUI
-from dsres.ds_commands import DS_NEST, DS_STATIC
-dir_path = dirname(realpath(__file__))
-sys.path.append(join(dir_path, "dsprh"))
-clr.AddReference("GameHook")
-# noinspection PyUnresolvedReferences
-from DarkShellRemastered import DSRHook
+from dsobj.ds_item import DSRItem
+from dsres.ds_resources import read_mod_items
+from dsres.ds_commands import DS_NEST, nest_add
+from colorama import Fore, init
+from traceback import format_exc
+from _version import __version__, check_for_updates, CheckUpdatesError
+from prompt_toolkit.shortcuts import set_title
+
+_DEBUG = False
+_FLAGS = {
+    "help": ("-h", "--help"),
+    "debug": ("-d", "--debug")
+}
 
 
-class DarkShell(DSRCmp):
+class DarkShell(DSRCmd):
 
-    def __init__(self, hook: DSRHook, script=None):
-        super(DarkShell, self).__init__()
-        self.game = DarkSouls(hook)
+    def __init__(self):
+        super(DarkShell, self).__init__(_DEBUG)
+        nest_add([DSRItem(item.strip(), -1).get_name() for item in read_mod_items()])
         self.set_nested_completer(DS_NEST)
-        self.execute_source(script)
-        if script is None:
-            open(self.game.STATIC_SOURCE, "a")
-            Thread(target=self.execute_static_commands).start()
+        self.game = DarkSouls(_DEBUG)
+        Thread(target=self._execute_static_commands).start()
 
-    def execute_static_commands(self):
+    def _execute_static_commands(self):
         execute = True
-        sleep(5)
         while True:
-            if execute:
-                if self.game.can_read():
-                    self.execute_source(self.game.STATIC_SOURCE)
-                    execute = False
-                else:
-                    sleep(0.1)
+            if execute and self.game.is_hooked():
+                if not self.game.can_read():
                     continue
+                else:
+                    static_commands = DarkSouls.STATIC_FUNC.copy()
+                    for func in static_commands.keys():
+                        try:
+                            self.game.switch(command=func[0], arguments=static_commands[func])
+                        except Exception as e:
+                            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" %
+                                                                          (type(e).__name__, e)) + Fore.RESET)
+                            continue
+                    execute = False
             if not self.game.can_read():
                 execute = True
-            sleep(0.1)
+
+    @staticmethod
+    def help_clear():
+        pass
 
     @staticmethod
     def do_clear(args):
         system("cls")
 
     @staticmethod
+    def help_exit():
+        pass
+
+    @staticmethod
     def do_exit(args):
         _exit(0)
+
+    @staticmethod
+    def help_quit():
+        pass
 
     @staticmethod
     def do_quit(args):
         _exit(0)
 
     @staticmethod
-    def do_end(args):
-        _exit(0)
-
-    def do_begin(self, args):
+    def help_end():
         pass
 
     @staticmethod
-    def help_static():
-        print("\nUsage:\t",
-              "static [command [args]]\n\t",
-              "static list\n\t",
-              "static clean\n\t",
-              "static remove [line-num]")
-        print("\nOptions:")
-        for opt in DS_STATIC.keys():
-            print("\t%s" % opt)
-        print("\n")
+    def do_end(args):
+        _exit(0)
 
-    def do_static(self, args):
-        try:
-            if args[0] in DS_STATIC.keys():
-                self.game.switch(command="static", arguments=args)
-            else:
-                if args[0] not in DS_NEST.keys():
-                    print("Unrecognized command: %s" % args[0])
-                else:
-                    print("Command '%s' can't be static!" % args[0])
-        except FileNotFoundError:
-            pass
+    @staticmethod
+    def help_pos_gui():
+        pass
 
     def do_pos_gui(self, args):
         try:
             DSRPositionGUI(process=self.game).mainloop()
         except Exception as e:
-            print("%s: %s\nCouldn't launch position GUI" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
+    @staticmethod
+    def help_graphics_gui():
+        pass
 
     def do_graphics_gui(self, args):
         try:
             DSRGraphicsGUI(process=self.game).mainloop()
         except Exception as e:
-            print("%s: %s\nCouldn't launch graphics GUI" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
 
     @staticmethod
     def help_set():
@@ -108,10 +110,36 @@ class DarkShell(DSRCmp):
     def do_set(self, args):
         try:
             self.game.switch(command="set", arguments=args)
-        except ValueError:
-            print("Wrong parameter type: %s " % args[1])
         except Exception as e:
-            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
+    @staticmethod
+    def help_enable():
+        print("\nUsage:\tenable [option/flag-id]")
+        print("\nOptions:")
+        for opt in DS_NEST["enable"].keys():
+            print("\t%s" % opt)
+        print("\n")
+
+    def do_enable(self, args):
+        try:
+            self.game.switch(command="enable", arguments=args + [True])
+        except Exception as e:
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
+    @staticmethod
+    def help_disable():
+        print("\nUsage:\tdisable [option/flag-id]")
+        print("\nOptions:")
+        for opt in DS_NEST["disable"].keys():
+            print("\t%s" % opt)
+        print("\n")
+
+    def do_disable(self, args):
+        try:
+            self.game.switch(command="enable", arguments=args + [False])
+        except Exception as e:
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
 
     @staticmethod
     def help_get():
@@ -125,35 +153,26 @@ class DarkShell(DSRCmp):
         try:
             self.game.switch(command="get", arguments=args)
         except Exception as e:
-            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
 
     @staticmethod
-    def help_enable():
-        print("\nUsage:\tenable [option/flag-id]")
-        print("\nOptions:")
-        for opt in DS_NEST["enable"].keys():
-            print("\t%s" % opt)
-        print("\n")
+    def help_game_restart():
+        pass
 
-    def do_enable(self, args):
+    def do_game_restart(self, args):
         try:
-            self.game.switch(command="enable", arguments=args+[True])
+            raise NotImplementedError("This option not yet available")
+            if self.game.game_restart():
+                print("Game restarted")
         except Exception as e:
-            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
 
     @staticmethod
-    def help_disable():
-        print("\nUsage:\tdisable [option/flag-id]")
-        print("\nOptions:")
-        for opt in DS_NEST["disable"].keys():
-            print("\t%s" % opt)
-        print("\n")
+    def help_menu_kick():
+        pass
 
-    def do_disable(self, args):
-        try:
-            self.game.switch(command="enable", arguments=args+[False])
-        except Exception as e:
-            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+    def do_menu_kick(self, args):
+        self.game.menu_kick()
 
     @staticmethod
     def help_item_get():
@@ -162,14 +181,29 @@ class DarkShell(DSRCmp):
 
     def do_item_get(self, args):
         try:
-            if args[0] in DarkSouls.ITEM_CATEGORIES:
-                self.game.create_custom_item(DarkSouls.ITEM_CATEGORIES[args[0]], args[1], args[2])
+            if len(args) > 0 and args[0] in DarkSouls.ITEM_CATEGORIES:
+                DarkSouls.create_custom_item(args, func=self.game.item_get)
                 return
             i_name, i_count = DarkSouls.get_item_name_and_count(args)
             if i_count > 0:
                 self.game.create_item(i_name, i_count, func=self.game.item_get)
         except Exception as e:
-            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
+    @staticmethod
+    def help_item_mod():
+        print("\nUsage:\titem-mod add\n")
+        print("\titem-mod remove [item-name]\n")
+        print("\titem-mod list\n")
+        print("\titem-mod clear\n")
+
+    def do_item_mod(self, args):
+        try:
+            if DarkSouls.add_new_item(args):
+                self.set_nested_completer(DS_NEST)
+                Thread(target=self.game.read_items).start()
+        except Exception as e:
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
 
     @staticmethod
     def help_item_get_upgrade():
@@ -181,11 +215,11 @@ class DarkShell(DSRCmp):
             if i_count > 0:
                 self.game.upgrade_item(i_name, i_count)
         except Exception as e:
-            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
 
     @staticmethod
     def help_warp():
-        print("\nUsage:\twarp [option [option]]")
+        print("\nUsage:\twarp [area-name [bonfire-name]]")
         print("\nOptions:")
         for opt in DS_NEST["warp"].keys():
             if DS_NEST["warp"][opt] is not None:
@@ -198,18 +232,60 @@ class DarkShell(DSRCmp):
 
     def do_warp(self, args):
         try:
+            if len(args) == 0:
+                DarkSouls.raise_warp_error("")
             if args[0] == "bonfire":
                 self.game.bonfire_warp()
             else:
                 b_name = " ".join(args[0:])
                 self.game.bonfire_warp_by_name(b_name)
         except Exception as e:
-            print("%s: %s\nCouldn't complete the command" % (type(e).__name__, e))
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
+    @staticmethod
+    def help_unlock_all_gestures():
+        pass
+
+    def do_unlock_all_gestures(self, args):
+        try:
+            raise NotImplementedError("This option not yet available")
+            if self.game.unlock_all_gestures():
+                print("All gestures unlocked")
+        except Exception as e:
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
+
+def has_flag(key: str):
+    for arg in argv:
+        if arg in _FLAGS[key]:
+            return True
+    return False
 
 
 if __name__ == "__main__":
-    DarkSouls.warn_anticheat()
-    source = argv[1] if len(argv) > 1 else None
-    if source is None:
-        print("Welcome to Dark Shell")
-    DarkShell(hook=DSRHook(5000, 5000), script=source).cmp_loop()
+    init()
+    if len(argv) > 1:
+        if has_flag("debug"):
+            _DEBUG = True
+        if has_flag("help"):
+            print(Fore.LIGHTYELLOW_EX + "Available options:")
+            for f in _FLAGS.values():
+                print("\t%s" % str(f))
+            exit()
+    print(Fore.LIGHTYELLOW_EX + "Loading..." + Fore.RESET)
+    set_title("DarkShell-R")
+    try:
+        is_latest, version = check_for_updates()
+        DarkShell.do_clear(args=[])
+    except CheckUpdatesError:
+        if _DEBUG:
+            print(Fore.RED + format_exc() + Fore.RESET)
+        is_latest, version = True, __version__
+    print(Fore.LIGHTBLUE_EX + "Welcome to DarkShell-R %s%s" % (
+        "v" + __version__, (" (v%s is available)" % version) if not is_latest else "" + Fore.RESET
+    ))
+    try:
+        DarkShell().cmd_loop()
+    except Exception as ex:
+        print(Fore.RED + (format_exc() if _DEBUG else "[FATAL] %s: %s" % (type(ex).__name__, ex)) + Fore.RESET)
+        input()

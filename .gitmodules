@@ -1,0 +1,3 @@
+[submodule "dsprh/PropertyHook"]
+	path = dsprh/PropertyHook
+	url = https://github.com/Nahnahchi/PropertyHook.git

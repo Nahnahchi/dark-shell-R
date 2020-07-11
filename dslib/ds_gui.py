@@ -1,22 +1,15 @@
 from dslib.ds_process import DSRProcess
 from os.path import join
-from os import getenv, makedirs
+from dsres.ds_resources import SAVE_DIR
 from tkinter import Tk, Label, StringVar, BooleanVar, Spinbox, Button, Entry, Checkbutton, LabelFrame
 from threading import Thread
 from time import sleep
 from pickle import dump, load, UnpicklingError
 
 
-save_dir = join(getenv("APPDATA"), "DarkShellR", "save")
-try:
-    makedirs(save_dir)
-except FileExistsError:
-    pass
-
-
 class DSRGraphicsGUI(Tk):
 
-    SAVE_FILE = join(save_dir, "graphics")
+    SAVE_FILE = join(SAVE_DIR, "graphics.dat")
     SAVED_DATA = {
         "override f": False,
         "sync br": True,

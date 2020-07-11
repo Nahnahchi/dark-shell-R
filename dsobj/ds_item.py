@@ -14,13 +14,13 @@ class Upgrade(Enum):
 
 class DSRItem:
 
-    def __init__(self, res: str, category: int):
-        res = res.split()
+    def __init__(self, source: str, category: int):
+        source = source.split()
         self.category = category
-        self.item_id = int(res[0])
-        self.stack_limit = int(res[1])
-        self.upgrade_type = Upgrade(int(res[2]))
-        self.item_name = res[3]
+        self.item_id = int(source[0]) if len(source) > 0 and source[0].isnumeric() else -1
+        self.stack_limit = int(source[1]) if len(source) > 1 and source[1].isnumeric() else -1
+        self.upgrade_type = Upgrade(int(source[2])) if len(source) > 2 and source[2].isnumeric() else Upgrade.NONE
+        self.item_name = source[3] if len(source) > 3 else ""
 
     def get_id(self):
         return self.item_id
@@ -42,10 +42,10 @@ class DSRInfusion:
 
     def __init__(self, res: str):
         res = res.split()
-        self.value = int(res[0])
-        self.max_upgrade = int(res[1])
-        self.restricted = bool(int(res[2]))
-        self.name = res[3]
+        self.value = int(res[0]) if len(res) > 0 and res[0].isnumeric() else -1
+        self.max_upgrade = int(res[1]) if len(res) > 1 and res[1].isnumeric() else -1
+        self.restricted = bool(int(res[2])) if len(res) > 2 and res[2].isnumeric() else -1
+        self.name = res[3] if len(res) > 3 else ""
 
     def get_name(self):
         return self.name
