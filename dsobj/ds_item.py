@@ -1,4 +1,5 @@
 from enum import Enum
+from colorama import Fore
 
 
 class Upgrade(Enum):
@@ -59,12 +60,12 @@ class DSRInfusion:
     def is_restricted(self):
         return self.is_restricted
 
-
-def infuse(item: DSRItem, infusion: DSRInfusion, upgrade: int):
-    if upgrade > infusion.get_max_upgrade() or upgrade < 0:
-        print("Can't upgrade %s weapons to +%d" % (infusion.get_name(), upgrade))
-        return -1
-    item_id = item.get_id() + upgrade
-    if item.get_upgrade_type() == Upgrade.INFUSABLE or item.get_upgrade_type() == Upgrade.INFUSABLE_RESTRICTED:
-        item_id += infusion.get_value()
-    return item_id
+    def infuse(self, item: DSRItem, upgrade: int):
+        item_id = item.get_id()
+        if item.get_upgrade_type() not in (Upgrade.INFUSABLE, Upgrade.INFUSABLE_RESTRICTED):
+            print(Fore.RED + ("Item '%s' is not infusable!" % self.get_name().replace("-", " ").title()) + Fore.RESET)
+        elif upgrade > self.get_max_upgrade() or upgrade < 0:
+            print(Fore.RED + ("Can't upgrade %s weapons to +%d!" % (self.get_name(), upgrade)) + Fore.RESET)
+        else:
+            item_id += upgrade + self.get_value()
+        return item_id

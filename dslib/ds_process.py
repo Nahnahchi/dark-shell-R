@@ -267,6 +267,23 @@ class DSRProcess:
         if not self.hook.SetName(name):
             raise WriteMemoryError()
 
+    def set_team_type(self, value: int):
+        if not self.hook.SetTeamType(value):
+            raise WriteMemoryError()
+
+    def set_phantom_type(self, value: int):
+        if not self.hook.SetChrType(value):
+            raise WriteMemoryError()
+
+    def set_ng_mode(self, value: int):
+        if not self.hook.SetNewGameType(value):
+            raise WriteMemoryError()
+
+    def get_last_animation(self):
+        if not self.is_hooked():
+            raise ReadMemoryError()
+        return self.hook.GetLastAnimation()
+
     def set_bonfire(self, value: int):
         if not self.hook.SetLastBonfire(value):
             raise WriteMemoryError()

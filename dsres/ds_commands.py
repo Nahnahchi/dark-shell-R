@@ -890,7 +890,7 @@ DS_BOOL = {
     "player-exterminate": None,
     "player-hide": None,
     "player-silence": None,
-    "event": None,
+    "events": None,
     "npc": None,
     "map": None,
     "obj": None,
@@ -914,7 +914,7 @@ DS_NEST = {
     "set": {
         "sls": None,
         "hum": None,
-        "speed-game": None,
+        "speed-self": None,
         "phantom-type": None,
         "team-type": None,
         "ng": None,
@@ -934,6 +934,7 @@ DS_NEST = {
     },
     "get": {
         "status": None,
+        "last-animation": None
     },
     "enable": DS_BOOL,
     "disable": DS_BOOL,
@@ -948,6 +949,12 @@ DS_NEST = {
     "unlock-all-gestures": None,
     "game-restart": None,
     "menu-kick": None,
+    "meta": {
+        "open": {
+            "appdata": None,
+            "cwd": None
+        }
+    },
     "pos-gui": None,
     "graphics-gui": None,
     "warp": {

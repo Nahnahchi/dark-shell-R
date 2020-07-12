@@ -69,6 +69,8 @@ namespace DarkShellRemastered
             MaxHealth = 0x3DC,
             Stamina = 0x3E8,
             MaxStamina = 0x3EC,
+            TeamType = 0xD8,
+            ChrType = 0xD4,
             ChrFlags2 = 0x514,
         }
 
@@ -191,6 +193,23 @@ namespace DarkShellRemastered
             ChrNameStr2 = 0xA8,
         }
 
+        public const string ChrData3AOB = "48 8B 05 ? ? ? ? 45 33 ED 48 8B F1 48 85 C0";
+        public const int ChrData3Offset = 0;
+        public enum ChrData3
+        {
+            NewGameType = 0x78
+        }
+
+        public const string AnimDataAOB = "48 8B 05 ? ? ? ? 48 39 48 68 0F 94 C0 C3";
+        public const int AnimDataOffset0 = 0;
+        public const int AnimDataOffset1 = 0x68;
+        public const int AnimDataOffset2 = 0x68;
+        public const int AnimDataOffset3 = 0x48;
+        public enum AnimData
+        {
+            LastAnimation = 0x80
+        }
+
         public const string EventFlagsAOB = "48 8B 0D ? ? ? ? 99 33 C2 45 33 C0 2B C2 8D 50 F6";
         public const int EventFlagsOffset1 = 0;
         public const int EventFlagsOffset2 = 0;
@@ -201,7 +220,8 @@ namespace DarkShellRemastered
 
         public const string LevelUpAOB = "48 89 74 24 ?? 57 48 83 EC 20 48 8B 05 ?? ?? ?? ?? 4C 8B C1";
 
-        public const long GameManPtr = 0x141D10E18;
+        public const string GameManAOB = "48 8B 05 ? ? ? ? 0F 28 01 66 0F 7F 80 ? ? 00 00 C6 80";
+        public const int GameManOffset = 0;
         public enum GameMan
         {
             IsDisableAllAreaEnemies = 0xD3F,

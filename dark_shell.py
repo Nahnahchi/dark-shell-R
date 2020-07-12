@@ -7,6 +7,7 @@ from dslib.ds_gui import DSRPositionGUI, DSRGraphicsGUI
 from dsobj.ds_item import DSRItem
 from dsres.ds_resources import read_mod_items
 from dsres.ds_commands import DS_NEST, nest_add
+from time import sleep
 from colorama import Fore, init
 from traceback import format_exc
 from _version import __version__, check_for_updates, CheckUpdatesError
@@ -26,13 +27,14 @@ class DarkShell(DSRCmd):
         nest_add([DSRItem(item.strip(), -1).get_name() for item in read_mod_items()])
         self.set_nested_completer(DS_NEST)
         self.game = DarkSouls(_DEBUG)
-        Thread(target=self._execute_static_commands).start()
+        Thread(target=self._execute_static_commands, args=(0.001,)).start()
 
-    def _execute_static_commands(self):
+    def _execute_static_commands(self, sleep_time: float):
         execute = True
         while True:
             if execute and self.game.is_hooked():
                 if not self.game.can_read():
+                    sleep(sleep_time)
                     continue
                 else:
                     static_commands = DarkSouls.STATIC_FUNC.copy()
@@ -46,6 +48,7 @@ class DarkShell(DSRCmd):
                     execute = False
             if not self.game.can_read():
                 execute = True
+            sleep(sleep_time)
 
     @staticmethod
     def help_clear():
@@ -83,6 +86,12 @@ class DarkShell(DSRCmd):
     def help_pos_gui():
         pass
 
+    def do_meta(self, args):
+        try:
+            self.game.switch(command="meta", arguments=args)
+        except Exception as e:
+            print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
     def do_pos_gui(self, args):
         try:
             DSRPositionGUI(process=self.game).mainloop()
@@ -101,11 +110,11 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_set():
-        print("\nUsage:\tset [option] [value]")
-        print("\nOptions:")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\tset [option] [value]")
+        print(Fore.LIGHTBLUE_EX + "\nOptions:" + Fore.LIGHTYELLOW_EX)
         for opt in DS_NEST["set"].keys():
             print("\t%s" % opt)
-        print("\n")
+        print(Fore.RESET)
 
     def do_set(self, args):
         try:
@@ -115,11 +124,11 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_enable():
-        print("\nUsage:\tenable [option/flag-id]")
-        print("\nOptions:")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\tenable [option/flag-id]")
+        print(Fore.LIGHTBLUE_EX + "\nOptions:" + Fore.LIGHTYELLOW_EX)
         for opt in DS_NEST["enable"].keys():
             print("\t%s" % opt)
-        print("\n")
+        print(Fore.RESET)
 
     def do_enable(self, args):
         try:
@@ -129,11 +138,11 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_disable():
-        print("\nUsage:\tdisable [option/flag-id]")
-        print("\nOptions:")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\tdisable [option/flag-id]")
+        print(Fore.LIGHTBLUE_EX + "\nOptions:" + Fore.LIGHTYELLOW_EX)
         for opt in DS_NEST["disable"].keys():
             print("\t%s" % opt)
-        print("\n")
+        print(Fore.RESET)
 
     def do_disable(self, args):
         try:
@@ -143,11 +152,11 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_get():
-        print("\nUsage:\tget [option/flag-id]")
-        print("\nOptions:")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\tget [option/flag-id]")
+        print(Fore.LIGHTBLUE_EX + "\nOptions:" + Fore.LIGHTYELLOW_EX)
         for opt in DS_NEST["get"].keys():
             print("\t%s" % opt)
-        print("\n")
+        print(Fore.RESET)
 
     def do_get(self, args):
         try:
@@ -176,8 +185,8 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_item_get():
-        print("\nUsage:\titem-get [item-name [count]]\n")
-        print("\titem-get [category-name] [item-ID] [count]\n")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\titem-get [item-name [count]]\n")
+        print("\titem-get [category-name] [item-ID] [count]\n" + Fore.RESET)
 
     def do_item_get(self, args):
         try:
@@ -192,14 +201,14 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_item_mod():
-        print("\nUsage:\titem-mod add\n")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\titem-mod add\n")
         print("\titem-mod remove [item-name]\n")
         print("\titem-mod list\n")
-        print("\titem-mod clear\n")
+        print("\titem-mod clear\n" + Fore.RESET)
 
     def do_item_mod(self, args):
         try:
-            if DarkSouls.add_new_item(args):
+            if DarkSouls.update_items(args):
                 self.set_nested_completer(DS_NEST)
                 Thread(target=self.game.read_items).start()
         except Exception as e:
@@ -207,7 +216,7 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_item_get_upgrade():
-        print("\nUsage:\titem-get-upgrade [item-name]\n")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\titem-get-upgrade [item-name]\n" + Fore.RESET)
 
     def do_item_get_upgrade(self, args):
         try:
@@ -219,8 +228,8 @@ class DarkShell(DSRCmd):
 
     @staticmethod
     def help_warp():
-        print("\nUsage:\twarp [area-name [bonfire-name]]")
-        print("\nOptions:")
+        print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\twarp [area-name [bonfire-name]]")
+        print(Fore.LIGHTBLUE_EX + "\nOptions:" + Fore.LIGHTYELLOW_EX)
         for opt in DS_NEST["warp"].keys():
             if DS_NEST["warp"][opt] is not None:
                 places = " [ "
@@ -228,7 +237,7 @@ class DarkShell(DSRCmd):
                     places += place + " "
                 opt += places + "]"
             print("\t%s" % opt)
-        print("\n")
+        print(Fore.RESET)
 
     def do_warp(self, args):
         try:
@@ -273,6 +282,7 @@ if __name__ == "__main__":
                 print("\t%s" % str(f))
             exit()
     print(Fore.LIGHTYELLOW_EX + "Loading..." + Fore.RESET)
+    DarkSouls.warn_anti_cheat()
     set_title("DarkShell-R")
     try:
         is_latest, version = check_for_updates()

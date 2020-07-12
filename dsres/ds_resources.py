@@ -1,5 +1,5 @@
 from os.path import join, isfile, exists, isdir
-from os import listdir, getcwd, getenv, makedirs
+from os import listdir, getcwd, getenv, makedirs, startfile
 import sys
 
 APPDATA = join(getenv("APPDATA"), "DarkShellR")
@@ -15,6 +15,14 @@ try:
     makedirs(MOD_DIR)
 except FileExistsError:
     pass
+
+
+def open_appdata():
+    startfile(APPDATA)
+
+
+def open_cwd():
+    startfile(RES_DIR)
 
 
 def get_item_dir():

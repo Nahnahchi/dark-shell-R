@@ -27,9 +27,11 @@ namespace DarkShellRemastered
         private PHPointer ChrAnimData;
         private PHPointer ChrPosData;
         private PHPointer ChrData2;
+        private PHPointer ChrData3;
         private PHPointer GraphicsData;
         private PHPointer MenuMan;
         private PHPointer EventFlags;
+        private PHPointer AnimData;
         public PHPointer GameMan;
 
 
@@ -63,8 +65,10 @@ namespace DarkShellRemastered
             EventFlags = RegisterRelativeAOB(DSROffsets.EventFlagsAOB, 3, 7, DSROffsets.EventFlagsOffset1, DSROffsets.EventFlagsOffset2);
             ItemGetAddr = RegisterAbsoluteAOB(DSROffsets.ItemGetAOB);
             BonfireWarpAddr = RegisterAbsoluteAOB(DSROffsets.BonfireWarpAOB);
-
-            GameMan = CreateBasePointer((IntPtr)DSROffsets.GameManPtr, 0);
+            ChrData3 = RegisterRelativeAOB(DSROffsets.ChrData3AOB, 3, 7, DSROffsets.ChrData3Offset);
+            AnimData = RegisterRelativeAOB(DSROffsets.AnimDataAOB, 3, 7, DSROffsets.AnimDataOffset0, DSROffsets.AnimDataOffset1, DSROffsets.AnimDataOffset2, DSROffsets.AnimDataOffset3);
+            GameMan = RegisterRelativeAOB(DSROffsets.GameManAOB, 3, 7, DSROffsets.GameManOffset);
+            
             ChrData1 = CreateChildPointer(WorldChrBase, (int)DSROffsets.WorldChrBase.ChrData1);
             ChrMapData = CreateBasePointer(IntPtr.Zero);
             ChrAnimData = CreateBasePointer(IntPtr.Zero);
@@ -108,7 +112,7 @@ namespace DarkShellRemastered
             }
         }
 
-        public bool Loaded => ChrPosData.Resolve() != IntPtr.Zero;
+        public bool Loaded => ChrPosData.Resolve() != IntPtr.Zero && ChrFollowCam.Resolve() != IntPtr.Zero;
 
         #region Game Man
         public bool DisableAllAreaEnemies(bool value)
@@ -189,7 +193,7 @@ namespace DarkShellRemastered
 
         public bool GameRestart()
         {
-            return GameMan.WriteInt32((int)DSROffsets.GameMan.bRequestToEnding, 1);
+            return GameMan.WriteFlag32((int)DSROffsets.GameMan.bRequestToEnding, 1, true);
         }
         #endregion
 
@@ -230,6 +234,16 @@ namespace DarkShellRemastered
                    ChrData2.WriteString((int)DSROffsets.ChrData2.ChrNameStr2, Encoding.Unicode, 64, value);
         }
 
+        public bool SetNewGameType(int value)
+        {
+            return ChrData3.WriteInt32((int)DSROffsets.ChrData3.NewGameType, value);
+        }
+
+        public int GetLastAnimation()
+        {
+            return AnimData.ReadInt32((int)DSROffsets.AnimData.LastAnimation);
+        }
+
         public int GetHealth()
         {
             return ChrData1.ReadInt32((int)DSROffsets.ChrData1.Health + Offsets.ChrData1Boost2); 
@@ -268,6 +282,16 @@ namespace DarkShellRemastered
         public bool SetStaminaMax(int value)
         {
             return ChrData1.WriteInt32((int)DSROffsets.ChrData1.MaxStamina + Offsets.ChrData1Boost2, value);
+        }
+
+        public bool SetTeamType(int value)
+        {
+            return ChrData1.WriteInt32((int)DSROffsets.ChrData1.TeamType, value);
+        }
+
+        public bool SetChrType(int value)
+        {
+            return ChrData1.WriteInt32((int)DSROffsets.ChrData1.ChrType, value);
         }
 
         public float GetPositionX()

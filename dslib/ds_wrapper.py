@@ -1,7 +1,7 @@
 from dslib.ds_process import DSRProcess, Stats
 from dslib.ds_cmd import DSRCmd
 from dsobj.ds_bonfire import DSRBonfire
-from dsobj.ds_item import DSRItem, DSRInfusion, Upgrade, infuse
+from dsobj.ds_item import DSRItem, DSRInfusion, Upgrade
 from dsres.ds_resources import SAVE_DIR
 from dsres.ds_commands import nest_add, nest_remove, nest_reset
 from prompt_toolkit.shortcuts import set_title, input_dialog, radiolist_dialog, message_dialog, yes_no_dialog
@@ -43,14 +43,6 @@ class DarkSouls(DSRProcess):
     def update_version(self):
         set_title("DarkShell-R — Game Version: %s" % self.get_version())
 
-    def change_stat(self, stat_name: str, stat_value: int):
-        try:
-            stat = Stats(stat_name)
-            return self.set_stat(stat, stat_value)
-        except ValueError:
-            print("Wrong arguments: %s" % stat_name)
-            return False
-
     @staticmethod
     def warn_anti_cheat():
         message_dialog(
@@ -63,7 +55,7 @@ class DarkSouls(DSRProcess):
         return arg.replace("-", " ").title()
 
     @staticmethod
-    def add_new_item(args):
+    def update_items(args):
         if len(args) == 0:
             raise ArgumentError("No arguments given!")
         else:
@@ -80,12 +72,12 @@ class DarkSouls(DSRProcess):
                     raise ArgumentError("Item name not specified!")
             elif args[0] == "list":
                 from dsres.ds_resources import read_mod_items
-                print("\n\tID\t\tName")
+                print(Fore.LIGHTBLUE_EX + "\n\tID\t\tName" + Fore.LIGHTYELLOW_EX)
                 for item in read_mod_items():
                     item = item.split()
                     if len(item) == 4:
                         print("\t%s\t\t%s" % (item[0], DarkSouls.get_name_from_arg(item[3])))
-                print("\n")
+                print(Fore.RESET)
             elif args[0] == "add":
                 from dsres.ds_resources import create_mod_files
                 create_mod_files(DarkSouls.ITEM_CATEGORIES)
@@ -112,7 +104,8 @@ class DarkSouls(DSRProcess):
                 formatted_name = "-".join(item_name.lower().split())
                 try:
                     if write_mod_item(category, formatted_name, int(item_id)):
-                        print("%s '%s' (ID: %s) added successfully" % (category.title(), item_name.title(), item_id))
+                        print(Fore.GREEN + ("%s '%s' (ID: %s) added successfully" % (
+                            category.title(), item_name.title(), item_id)) + Fore.RESET)
                         nest_add([formatted_name])
                         return True
                     return False
@@ -164,7 +157,8 @@ class DarkSouls(DSRProcess):
         ).run()
         try:
             if int(upgrade) > max_upgrade or int(upgrade) < 0:
-                print("Can't upgrade %sPyromancy Flame to +%s" % ("Ascended " if is_pyro_asc else "", upgrade))
+                print(Fore.RED + ("Can't upgrade %sPyromancy Flame to +%s" % (
+                    "Ascended " if is_pyro_asc else "", upgrade)) + Fore.RESET)
                 return None
         except ValueError:
             raise ArgumentError("Can't convert %s '%s' to int!" % (type(upgrade).__name__, upgrade))
@@ -180,7 +174,8 @@ class DarkSouls(DSRProcess):
         ).run()
         try:
             if int(upgrade) > max_upgrade or int(upgrade) < 0:
-                print("Can't upgrade %s to +%s" % ("Unique" if is_unique else "Armor", upgrade))
+                print(Fore.RED + ("Can't upgrade %s to +%s" % (
+                    "Unique" if is_unique else "Armor", upgrade)) + Fore.RESET)
                 return None
         except ValueError:
             raise ArgumentError("Can't convert %s '%s' to int!" % (type(upgrade).__name__, upgrade))
@@ -194,11 +189,16 @@ class DarkSouls(DSRProcess):
         ).run()
 
     def print_status(self):
-        print("\n\tHealth: %d/%d" % (self.get_hp(), self.get_hp_max()))
-        print("\tStamina: %d\n" % self.get_stamina())
+        print(Fore.LIGHTBLUE_EX + "\n\tLevel:" + Fore.LIGHTYELLOW_EX + (" %d" % self.get_stat(Stats.SLV)))
+        print(Fore.LIGHTBLUE_EX + "\n\tHealth:" + Fore.RED + (" %d/%d" % (self.get_hp(), self.get_hp_max())))
+        print(Fore.LIGHTBLUE_EX + "\tStamina:" + Fore.GREEN + (" %d\n" % self.get_stamina()))
+        exclude = (Stats.SLV, Stats.SLS, Stats.HUM)
         for stat in self.stats.keys():
-            print("\t%s: %d" % (stat.value, self.get_stat(stat)))
-        print("\n")
+            if stat not in exclude:
+                print(Fore.LIGHTBLUE_EX + ("\t%s:" % stat.value) + Fore.LIGHTYELLOW_EX + (" %d" % self.get_stat(stat)))
+        print(Fore.LIGHTBLUE_EX + "\n\tSouls:" + Fore.LIGHTYELLOW_EX + (" %d" % self.get_stat(Stats.SLS)))
+        print(Fore.LIGHTBLUE_EX + "\tHumanity:" + Fore.LIGHTYELLOW_EX + (" %d" % self.get_stat(Stats.HUM)))
+        print(Fore.RESET)
 
     @staticmethod
     def raise_warp_error(b_full_name: str):
@@ -225,7 +225,7 @@ class DarkSouls(DSRProcess):
             b_id = self.bonfires[b_full_name].get_id()
             self.set_bonfire(b_id)
             self.bonfire_warp()
-            print("Warped to location ID: %d" % b_id)
+            print(Fore.GREEN + ("Warped to location ID: %d" % b_id) + Fore.RESET)
 
     def level_stat(self, s_name: str, s_level: int):
         for stat in self.stats.keys():
@@ -235,7 +235,7 @@ class DarkSouls(DSRProcess):
             else:
                 new_stat = s_level
                 cur_stat = self.get_stat(stat)
-                soul_level = self.get_soul_level() + (new_stat - cur_stat)
+                soul_level = self.get_stat(Stats.SLV) + (new_stat - cur_stat)
                 self.stats[stat] = new_stat
                 self.stats[Stats.SLV] = soul_level
         return self.level_up(self.stats)
@@ -248,14 +248,14 @@ class DarkSouls(DSRProcess):
             i_id = item.get_id()
             i_cat = item.get_category()
             func(i_cat, i_id, i_count)
-            print("Created new item, ID: %d" % i_id)
+            print(Fore.GREEN + ("Created new item, ID: %d" % i_id) + Fore.RESET)
 
     @staticmethod
     def create_custom_item(args: list, func):
         try:
             i_cat, i_id, i_count = DarkSouls.ITEM_CATEGORIES[args[0]], args[1], args[2]
             func(i_cat, i_id, i_count)
-            print("Created new item, ID: %s" % i_id)
+            print(Fore.GREEN + ("Created new item, ID: %s" % i_id) + Fore.RESET)
         except IndexError:
             raise ArgumentError("No item ID/count specified!")
 
@@ -267,7 +267,7 @@ class DarkSouls(DSRProcess):
             i_id = item.get_id()
             i_category = item.get_category()
             if item.get_upgrade_type() == Upgrade.NONE:
-                print("Can't upgrade this item!")
+                print(Fore.RED + "Can't upgrade this item!" + Fore.RESET)
                 return
             elif item.get_upgrade_type() in (Upgrade.ARMOR, Upgrade.UNIQUE):
                 upgrade = DarkSouls.get_upgrade_value_armor_or_unique(item)
@@ -287,16 +287,27 @@ class DarkSouls(DSRProcess):
                 upgrade, infusion = DarkSouls.get_upgrade_value_infusable(values, item)
                 if upgrade is None:
                     return
-                i_id = infuse(item, self.infusions[infusion], int(upgrade))
+                i_id = self.infusions[infusion].infuse(item, int(upgrade))
             else:
                 raise AssertionError(
                     "Can't determine the upgrade type for item '%s'!" % DarkSouls.get_name_from_arg(i_name)
                 )
-            if i_id <= 0:
-                print("Upgrade failed")
-            else:
+            if i_id <= item.get_id():
                 self.item_get(i_category, i_id, i_count)
-                print("Upgrade successful")
+                print(Fore.GREEN + "Upgrade successful" + Fore.RESET)
+
+    def read_performed_animations(self):
+        from time import sleep
+        from datetime import datetime
+        print(Fore.LIGHTBLUE_EX + "\n\tTime\t\tID" + Fore.RESET)
+        last_anim_id = 0
+        while True:
+            curr_anim_id = self.get_last_animation()
+            curr_time = datetime.now().strftime("%H:%M:%S")
+            if curr_anim_id != -1 and curr_anim_id != last_anim_id:
+                print(Fore.LIGHTYELLOW_EX + "\t" + curr_time + "\t" + str(curr_anim_id) + Fore.RESET)
+                last_anim_id = curr_anim_id
+            sleep(0.016)
 
     def read_bonfires(self):
         from dsres.ds_resources import get_bonfires
@@ -369,6 +380,16 @@ class DarkSouls(DSRProcess):
             open(DarkSouls.STATIC_SOURCE, "w+")
             DarkSouls.STATIC_FUNC.clear()
 
+    def open_folder(self, args):
+        from dsres.ds_resources import open_appdata, open_cwd
+        if not self.debug:
+            print(Fore.RED + "This option is only available in debug state!" + Fore.RESET)
+        else:
+            if "cwd" in args:
+                open_cwd()
+            if "appdata" in args:
+                open_appdata()
+
     @staticmethod
     def write_static_func():
         dump(DarkSouls.STATIC_FUNC, open(DarkSouls.STATIC_SOURCE, "wb"))
@@ -415,13 +436,13 @@ class DarkSouls(DSRProcess):
                 stat_name = arguments[0]
                 dark_souls.validate_stat(stat_name)
                 stat_value = int(arguments[1])
-                if dark_souls.change_stat(stat_name, stat_value):
-                    print("%s set to %d" % (stat_name.upper(), stat_value))
+                if dark_souls.set_stat(stat_name, stat_value):
+                    print(Fore.GREEN + ("%s set to %d" % (stat_name.upper(), stat_value)) + Fore.RESET)
 
             @staticmethod
             def get_default():
                 flag_id = convert(arguments[0], int)
-                print("FLAG %d: %s" % (flag_id, dark_souls.read_event_flag(flag_id)))
+                print(Fore.GREEN + ("FLAG %d: %s" % (flag_id, dark_souls.read_event_flag(flag_id))) + Fore.RESET)
 
             @staticmethod
             def enable_default():
@@ -429,319 +450,313 @@ class DarkSouls(DSRProcess):
                 flag_id = convert(arguments[0], int)
                 enable = arguments[1]
                 dark_souls.write_event_flag(flag_id, enable)
-                print("EVENT FLAG %d %s" % (flag_id, ("enabled" if enable else "disabled")))
+                print(Fore.GREEN + ("EVENT FLAG %d %s" % (flag_id, ("enabled" if enable else "disabled"))) + Fore.RESET)
 
             @staticmethod
-            def set_speed_game():
+            def meta_default():
+                pass
+
+            @staticmethod
+            def set_speed_self():
                 speed = convert(arguments[1], float)
                 dark_souls.set_game_speed(speed)
-                print("Game speed changed to %.2f" % speed)
-                if speed == 1.0:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("Animation speed changed to %.2f" % speed) + Fore.RESET)
+                key = (command, arguments[0])
+                if speed != 1.0:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def set_phantom_type():
-                raise NotImplementedError("This option not yet available")
                 phantom_type = convert(arguments[1], int)
                 dark_souls.set_phantom_type(phantom_type)
-                print("Phantom type set to %d" % phantom_type)
+                print(Fore.GREEN + ("Phantom type set to %d" % phantom_type) + Fore.RESET)
 
             @staticmethod
             def set_team_type():
-                raise NotImplementedError("This option not yet available")
                 team_type = convert(arguments[1], int)
                 dark_souls.set_team_type(team_type)
-                print("Team type set to %d" % team_type)
+                print(Fore.GREEN + ("Team type set to %d" % team_type) + Fore.RESET)
 
             @staticmethod
             def set_sls():
                 souls = convert(arguments[1], int)
                 dark_souls.set_stat(Stats.SLS, souls)
-                print("Souls set to %d" % souls)
+                print(Fore.GREEN + ("Souls set to %d" % souls) + Fore.RESET)
 
             @staticmethod
             def set_hum():
                 humanity = convert(arguments[1], int)
                 dark_souls.set_stat(Stats.HUM, humanity)
-                print("Humanity set to %d" % humanity)
+                print(Fore.GREEN + ("Humanity set to %d" % humanity) + Fore.RESET)
 
             @staticmethod
             def set_name():
                 name = " ".join(arguments[1:])
                 dark_souls.set_name(name)
-                print("Name set to '%s'" % name)
+                print(Fore.GREEN + ("Name set to '%s'" % name) + Fore.RESET)
 
             @staticmethod
             def set_ng():
-                raise NotImplementedError("This option not yet available")
                 new_game = convert(arguments[1], int)
                 dark_souls.set_ng_mode(new_game)
-                print("NG changed to +%d" % new_game)
-
-            @staticmethod
-            def set_covenant():
-                raise NotImplementedError("This option not yet available")
-                covenant_name = arguments[1]
-                dark_souls.validate_covenant(covenant_name)
-                covenant_id = dark_souls.covenants[covenant_name]
-                dark_souls.set_covenant(covenant_id)
-                print("Covenant changed to %s" % DarkSouls.get_name_from_arg(covenant_name))
+                print(Fore.GREEN + ("NG changed to +%d" % new_game) + Fore.RESET)
 
             @staticmethod
             def get_status():
                 dark_souls.print_status()
 
             @staticmethod
+            def get_last_animation():
+                dark_souls.read_performed_animations()
+
+            @staticmethod
             def enable_super_armor():
                 enable = arguments[1]
                 dark_souls.set_super_armor(enable)
-                print("SUPER ARMOR %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("SUPER ARMOR %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
-
-            @staticmethod
-            def enable_draw():
-                raise NotImplementedError("This option not yet available")
-                enable = arguments[1]
-                dark_souls.set_draw_enable(enable)
-                print("DRAW %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
-                else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_gravity():
                 enable = arguments[1]
                 dark_souls.set_no_gravity(not enable)
-                print("GRAVITY %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("GRAVITY %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_dead():
                 enable = arguments[1]
                 dark_souls.set_no_dead(enable)
-                print("NO DEAD %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO DEAD %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_stamina_consume():
                 enable = arguments[1]
                 dark_souls.set_no_stamina_consume(enable)
-                print("NO STAMINA CONSUME %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO STAMINA CONSUME %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_goods_consume():
                 enable = arguments[1]
                 dark_souls.set_no_goods_consume(enable)
-                print("NO GOODS CONSUME %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO GOODS CONSUME %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
-
-            @staticmethod
-            def enable_no_update():
-                raise NotImplementedError("This option not yet available")
-                enable = arguments[1]
-                dark_souls.set_no_update(enable)
-                print("NO UPDATE %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
-                else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
-
-            @staticmethod
-            def enable_no_attack():
-                raise NotImplementedError("This option not yet available")
-                enable = arguments[1]
-                dark_souls.set_no_attack(enable)
-                print("NO ATTACK %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
-                else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
-
-            @staticmethod
-            def enable_no_move():
-                raise NotImplementedError("This option not yet available")
-                enable = arguments[1]
-                dark_souls.set_no_move(enable)
-                print("NO MOVE %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
-                else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_damage():
                 enable = arguments[1]
                 dark_souls.set_no_damage(enable)
-                print("NO DAMAGE %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO DAMAGE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_hit():
                 enable = arguments[1]
                 dark_souls.set_no_hit(enable)
-                print("NO HIT %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO HIT %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_magic_all():
                 enable = arguments[1]
                 dark_souls.set_no_magic_all(enable)
-                print("NO MAGIC ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO MAGIC ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_ammo_consume_all():
                 enable = arguments[1]
                 dark_souls.set_no_ammo_consume_all(enable)
-                print("NO AMMO CONSUME ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO AMMO CONSUME ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_dead_all():
                 enable = arguments[1]
                 dark_souls.set_no_dead_all(enable)
-                print("NO DEAD ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO DEAD ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_damage_all():
                 enable = arguments[1]
                 dark_souls.set_no_damage_all(enable)
-                print("NO DAMAGE ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO DAMAGE ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_hit_all():
                 enable = arguments[1]
                 dark_souls.set_no_hit_all(enable)
-                print("NO HIT ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO HIT ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_attack_all():
                 enable = arguments[1]
                 dark_souls.set_no_attack_all(enable)
-                print("NO ATTACK ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO ATTACK ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_move_all():
                 enable = arguments[1]
                 dark_souls.set_no_move_all(enable)
-                print("NO MOVE ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO MOVE ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_no_update_ai_all():
                 enable = arguments[1]
                 dark_souls.set_no_update_ai_all(enable)
-                print("NO UPDATE AI ALL %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("NO UPDATE AI ALL %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_death_cam():
                 enable = arguments[1]
                 dark_souls.death_cam(enable)
-                print("DEATH CAM %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("DEATH CAM %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_player_dead_mode():
                 enable = arguments[1]
                 dark_souls.set_player_dead_mode(enable)
-                print("PLAYER DEAD MODE %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("PLAYER DEAD MODE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_player_exterminate():
                 enable = arguments[1]
                 dark_souls.set_exterminate(enable)
-                print("PLAYER EXTERMINATE %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("PLAYER EXTERMINATE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_player_hide():
                 enable = arguments[1]
                 dark_souls.set_hide(enable)
-                print("PLAYER HIDE %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("PLAYER HIDE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
             def enable_player_silence():
                 enable = arguments[1]
                 dark_souls.set_silence(enable)
-                print("PLAYER SILENCE %s" % ("enabled" if enable else "disabled"))
-                if not enable:
-                    DarkSouls.STATIC_FUNC.pop((command, arguments[0]))
+                print(Fore.GREEN + ("PLAYER SILENCE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    DarkSouls.STATIC_FUNC[(command, arguments[0])] = arguments
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
-            def enable_event():
+            def enable_events():
                 enable = arguments[1]
                 dark_souls.disable_all_area_event(not enable)
-                print("ALL AREA EVENT %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA EVENTS %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_npc():
@@ -750,79 +765,83 @@ class DarkSouls(DSRProcess):
                     if not dark_souls.warn_disable_npc():
                         return
                 dark_souls.disable_all_area_enemies(not enable)
-                print("ALL AREA ENEMIES %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA ENEMIES %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_map():
                 enable = arguments[1]
                 dark_souls.disable_all_area_map(not enable)
-                print("ALL AREA MAP %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA MAP %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_obj():
                 enable = arguments[1]
                 dark_souls.disable_all_area_obj(not enable)
-                print("ALL AREA OBJ %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA OBJ %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_obj_break():
                 enable = arguments[1]
                 dark_souls.enable_all_area_obj_break(enable)
-                print("ALL AREA OBJ BREAK %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA OBJ BREAK %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_hi_hit():
                 enable = arguments[1]
                 dark_souls.disable_all_area_hi_hit(not enable)
-                print("ALL AREA HI HIT %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA HI HIT %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_lo_hit():
                 enable = arguments[1]
                 dark_souls.disable_all_area_lo_hit(not enable)
-                print("ALL AREA LO HIT %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA LO HIT %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_sfx():
                 enable = arguments[1]
                 dark_souls.disable_all_area_sfx(not enable)
-                print("ALL AREA SFX %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA SFX %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_sound():
                 enable = arguments[1]
                 dark_souls.disable_all_area_sound(not enable)
-                print("ALL AREA SOUND %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ALL AREA SOUND %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_obj_break_record_mode():
                 enable = arguments[1]
                 dark_souls.enable_obj_break_record_mode(enable)
-                print("OBJ BREAK RECORD MODE %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("OBJ BREAK RECORD MODE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_auto_map_warp_mode():
                 enable = arguments[1]
                 dark_souls.enable_auto_map_warp_mode(enable)
-                print("AUTO MAP WARP MODE %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("AUTO MAP WARP MODE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_chr_npc_wander_test():
                 enable = arguments[1]
                 dark_souls.enable_chr_npc_wander_test(enable)
-                print("CHR NPC WANDER TEST %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("CHR NPC WANDER TEST %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_dbg_chr_all_dead():
                 enable = arguments[1]
                 dark_souls.enable_dbg_chr_all_dead(enable)
-                print("DBG CHR ALL DEAD %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("DBG CHR ALL DEAD %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
 
             @staticmethod
             def enable_online_mode():
                 enable = arguments[1]
                 dark_souls.enable_online_mode(enable)
-                print("ONLINE MODE %s" % ("enabled" if enable else "disabled"))
+                print(Fore.GREEN + ("ONLINE MODE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+
+            @staticmethod
+            def meta_open():
+                dark_souls.open_folder(arguments)
 
         Switcher.switch()
         DarkSouls.write_static_func()
