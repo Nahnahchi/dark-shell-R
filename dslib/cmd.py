@@ -3,7 +3,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 from traceback import format_exc
 from colorama import Fore
-from time import sleep
+from sys import _getframe
 
 
 class CmdParser:
@@ -11,7 +11,7 @@ class CmdParser:
     def __init__(self, args: str):
         args = args.split()
         self.command = args[0] if len(args) > 0 else ""
-        self.arguments = args[1:] if len(args) > 1 else ["default"]
+        self.arguments = args[1:] if len(args) > 1 else [DSRCmd.default]
 
     def get_command(self):
         return self.command
@@ -24,6 +24,7 @@ class DSRCmd:
 
     com_prefix = "do"
     help_prefix = "help"
+    default = "default"
     prompt_prefix = "~ "
 
     def __init__(self, debug=False):
@@ -61,25 +62,28 @@ class DSRCmd:
             getattr(
                 self, DSRCmd.get_method_name(
                     prefix=DSRCmd.com_prefix,
-                    name=command if command.strip() else "default"
+                    name=command if command.strip() else DSRCmd.default
                 )
             )(arguments)
         except AttributeError as e:
-            print(Fore.RED + (format_exc() if self.debug else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+            print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
+                type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
 
     def do_help(self, args):
-        if len(args) > 0:
+        if args[0] != DSRCmd.default:
             try:
                 getattr(self, DSRCmd.get_method_name(prefix=DSRCmd.help_prefix, name=args[0]))()
             except AttributeError as e:
-                print(Fore.RED + (format_exc() if self.debug else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+                print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
+                    type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
         else:
+            prefix = DSRCmd.get_method_name(prefix=DSRCmd.com_prefix, name="")
+            prefix_len = len(prefix)
             commands = []
             for name in dir(self.__class__):
-                prefix_len = len(DSRCmd.com_prefix)
-                if name[:prefix_len] == DSRCmd.com_prefix:
+                if name[:prefix_len] == prefix:
                     com_name = name[prefix_len:]
-                    if com_name != "default":
+                    if com_name != DSRCmd.default:
                         commands.append(com_name.replace("_", "-"))
             commands.sort()
             print(Fore.LIGHTYELLOW_EX)
@@ -89,4 +93,4 @@ class DSRCmd:
 
     def do_default(self, args):
         if self.debug:
-            print(Fore.BLUE + "default" + Fore.RESET)
+            print(Fore.BLUE + "time for crab" + Fore.RESET)

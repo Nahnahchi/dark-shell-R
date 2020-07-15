@@ -1,13 +1,14 @@
+# noinspection PyUnresolvedReferences
+from dsbin.imports import Stats, Enum, get_clr_type
 from dslib.process import DSRProcess
 from dslib.cmd import DSRCmd
 from dsobj.bonfire import DSRBonfire
 from dsobj.item import DSRItem, DSRInfusion, Upgrade
 from dsres.resources import SAVE_DIR
-# noinspection PyUnresolvedReferences
-from dsbin.imports import Stats, Enum, get_clr_type
 from dsres.commands import nest_add, nest_remove, nest_reset
 from prompt_toolkit.shortcuts import set_title, input_dialog, radiolist_dialog, message_dialog, yes_no_dialog
 from os.path import join
+from sys import _getframe
 from beepy import beep
 from time import sleep
 from datetime import datetime
@@ -213,7 +214,7 @@ class DarkSouls(DSRProcess):
     @staticmethod
     def raise_warp_error(b_full_name: str):
         from dsres.commands import DSR_NEST
-        if not b_full_name.strip() or b_full_name.lower() == "default":
+        if not b_full_name.strip() or b_full_name.lower() == DSRCmd.default:
             raise ArgumentError("No arguments given!")
         area_name = b_full_name.split()[0]
         if area_name not in DSR_NEST["warp"].keys():
@@ -238,6 +239,7 @@ class DarkSouls(DSRProcess):
             print(Fore.GREEN + ("Warped to location ID: %d" % b_id) + Fore.RESET)
 
     def level_stat(self, s_name: str, s_level: int):
+        raise NotImplementedError("Function unavailable")
         for stat in self.stats.keys():
             if stat.value != s_name:
                 if stat != Stats.LVL:
@@ -336,7 +338,8 @@ class DarkSouls(DSRProcess):
                     DarkSouls.WAITING_FUNC.pop(pid)
                     self.save_func()
         except Exception as e:
-            print(Fore.RED + (format_exc() if self.debug else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+            print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
+                type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
 
     def read_performed_animations(self):
         print(Fore.LIGHTBLUE_EX + "\n\tTime\t\tID" + Fore.RESET)
@@ -421,7 +424,7 @@ class DarkSouls(DSRProcess):
                 self.banners[banner_name] = banner_id
             except Exception as e:
                 print(Fore.RED + (format_exc() if self.debug else
-                                  "%s: Error reading banners: %s | %s" %
+                                  "%s: Error reading banner: %s | %s" %
                                   (type(e).__name__, b.split(), e)) + Fore.RESET)
 
     @staticmethod
@@ -433,7 +436,9 @@ class DarkSouls(DSRProcess):
 
     @staticmethod
     def manage_thread_info(args):
-        if args[0] == "clear":
+        if len(args) == 0:
+            raise ArgumentError("No option specified!")
+        elif args[0] == "clear":
             from dsres.commands import DSR_NEST
             arg = args[1:] if len(args) > 1 else DSR_NEST["meta"]["processes"]["clear"].keys()
             DarkSouls.clear_saved_func(arg)

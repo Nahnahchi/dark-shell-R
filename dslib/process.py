@@ -1,7 +1,7 @@
-from time import sleep
-from math import pi
 # noinspection PyUnresolvedReferences
 from dsbin.imports import DSRHook, Stats
+from time import sleep
+from math import pi
 
 
 def wait_for(predicate, desired_state=True, single_frame=0.016):
