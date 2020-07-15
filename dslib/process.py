@@ -1,7 +1,16 @@
-from enum import Enum
+from time import sleep
 from math import pi
 # noinspection PyUnresolvedReferences
-from dsprh.ds_imports import DSRHook
+from dsbin.imports import DSRHook, Stats
+
+
+def wait_for(predicate, desired_state=True, single_frame=0.016):
+    if not callable(predicate):
+        return False
+    else:
+        while predicate() != desired_state:
+            sleep(single_frame)
+        return True
 
 
 class ReadMemoryError(Exception):
@@ -20,11 +29,11 @@ class WriteMemoryError(Exception):
 
 class AsmExecuteError(Exception):
 
-    ERR = {
+    ERR = ({
         0x00000080: "WAIT_ABANDONED",
         0x00000102: "WAIT_TIMEOUT",
         0xFFFFFFFF: "WAIT_FAILED"
-    }
+    })
 
     def __init__(self, code, message="Failed to execute assembly"):
         self.message = message
@@ -33,21 +42,6 @@ class AsmExecuteError(Exception):
 
     def __str__(self):
         return "%s (%s)" % (self.message, self.error)
-
-
-class Stats(Enum):
-
-    VIT = "vit"
-    ATN = "atn"
-    END = "end"
-    STR = "str"
-    DEX = "dex"
-    RES = "res"
-    INT = "int"
-    FTH = "fth"
-    SLV = "slv"
-    SLS = "sls"
-    HUM = "hum"
 
 
 class DSRProcess:
@@ -68,9 +62,18 @@ class DSRProcess:
     def can_read(self):
         return self.hook.Loaded
 
-    def set_game_speed(self, value):
+    def set_animation_speed(self, value: float):
         if not self.hook.SetAnimSpeed(value):
             raise WriteMemoryError()
+
+    def menu_kick(self):
+        self.hook.MenuKick()
+
+    def display_banner(self, value: int):
+        self.hook.DisplayBanner(value)
+
+    def game_restart(self):
+        return self.hook.GameRestart()
 
     def get_stat(self, stat: Stats):
         if stat == Stats.VIT:
@@ -89,7 +92,7 @@ class DSRProcess:
             return self.hook.GetIntelligence()
         elif stat == Stats.FTH:
             return self.hook.GetFaith()
-        elif stat == Stats.SLV:
+        elif stat == Stats.LVL:
             return self.hook.GetSoulLevel()
         elif stat == Stats.SLS:
             return self.hook.GetSouls()
@@ -117,7 +120,7 @@ class DSRProcess:
             return self.update_sl(stat, value) and self.hook.SetIntelligence(value)
         elif stat == Stats.FTH:
             return self.update_sl(stat, value) and self.hook.SetFaith(value)
-        elif stat == Stats.SLV:
+        elif stat == Stats.LVL:
             return self.hook.SetSoulLevel(value)
         elif stat == Stats.SLS:
             return self.hook.SetSouls(value)
@@ -125,13 +128,16 @@ class DSRProcess:
             return self.hook.SetHumanity(value)
 
     def read_event_flag(self, flag_id: int):
-        if not self.is_hooked():
-            raise ReadMemoryError()
+        if not self.can_read():
+            return None
         return self.hook.ReadEventFlag(flag_id)
 
     def write_event_flag(self, flag_id: int, state: bool):
         if not self.hook.WriteEventFlag(flag_id, state):
             raise WriteMemoryError()
+
+    def listen_for_flag(self, flag_id, flag_state):
+        return wait_for(lambda: self.read_event_flag(flag_id), desired_state=flag_state)
 
     def death_cam(self, enable: bool):
         if not self.hook.SetDeathCam(enable):
@@ -261,7 +267,7 @@ class DSRProcess:
         )
 
     def jump_pos(self, x, y, z, a):
-        self.hook.PosWarp(x, y, z, a)
+        self.hook.PosWarp(x, y, z, a / 360 * 2 * pi - pi)
 
     def set_name(self, name: str):
         if not self.hook.SetName(name):

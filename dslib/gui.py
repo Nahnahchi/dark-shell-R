@@ -1,10 +1,12 @@
-from dslib.ds_process import DSRProcess
+from dslib.process import DSRProcess
 from os.path import join
-from dsres.ds_resources import SAVE_DIR
-from tkinter import Tk, Label, StringVar, BooleanVar, Spinbox, Button, Entry, Checkbutton, LabelFrame
+from dsres.resources import SAVE_DIR
+from mttkinter.mtTkinter import Tk, Label, StringVar, BooleanVar, Spinbox, Button, Entry, Checkbutton, LabelFrame
 from threading import Thread
 from time import sleep
 from pickle import dump, load, UnpicklingError
+from colorama import Fore
+from traceback import format_exc
 
 
 class DSRGraphicsGUI(Tk):
@@ -24,15 +26,18 @@ class DSRGraphicsGUI(Tk):
         "hue": 0.000
     }
 
-    def __init__(self, process: DSRProcess):
+    def __init__(self, process: DSRProcess, debug=False):
 
         super(DSRGraphicsGUI, self).__init__()
 
         try:
             saved = load(open(DSRGraphicsGUI.SAVE_FILE, "rb"))
-        except (UnpicklingError, FileNotFoundError):
+        except (UnpicklingError, FileNotFoundError, EOFError):
             saved = DSRGraphicsGUI.SAVED_DATA
+            if debug:
+                print(Fore.RED + format_exc() + Fore.RESET)
 
+        self.debug = debug
         self.process = process
 
         self.title("GraphicsGUI")
@@ -81,21 +86,21 @@ class DSRGraphicsGUI(Tk):
         self.brightness_r = StringVar()
         self.brightness_r.set(saved["brightness r"])
         box_br_r = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.brightness_r, width=15,
-                           command=self.set_brightness_r)
+                           command=self.set_brightness_r, increment=0.05)
         box_br_r.grid(row=2, column=0, sticky="W")
         box_br_r.bind("<Return>", self.set_brightness_r)
 
         self.brightness_g = StringVar()
         self.brightness_g.set(saved["brightness g"])
         box_br_g = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.brightness_g, width=15,
-                           command=self.set_brightness_g)
+                           command=self.set_brightness_g, increment=0.05)
         box_br_g.grid(row=2, column=1, sticky="W")
         box_br_g.bind("<Return>", self.set_brightness_g)
 
         self.brightness_b = StringVar()
         self.brightness_b.set(saved["brightness b"])
         box_br_b = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.brightness_b, width=15,
-                           command=self.set_brightness_b)
+                           command=self.set_brightness_b, increment=0.05)
         box_br_b.grid(row=2, column=2, sticky="W")
         box_br_b.bind("<Return>", self.set_brightness_b)
 
@@ -107,21 +112,21 @@ class DSRGraphicsGUI(Tk):
         self.contrast_r = StringVar()
         self.contrast_r.set(saved["contrast r"])
         box_co_r = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.contrast_r, width=15,
-                           command=self.set_contrast_r)
+                           command=self.set_contrast_r, increment=0.05)
         box_co_r.grid(row=4, column=0, sticky="W")
         box_co_r.bind("<Return>", self.set_contrast_r)
 
         self.contrast_g = StringVar()
         self.contrast_g.set(saved["contrast g"])
         box_co_g = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.contrast_g, width=15,
-                           command=self.set_contrast_g)
+                           command=self.set_contrast_g, increment=0.05)
         box_co_g.grid(row=4, column=1, sticky="W")
         box_co_g.bind("<Return>", self.set_contrast_g)
 
         self.contrast_b = StringVar()
         self.contrast_b.set(saved["contrast b"])
         box_co_b = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.contrast_b, width=15,
-                           command=self.set_contrast_b)
+                           command=self.set_contrast_b, increment=0.05)
         box_co_b.grid(row=4, column=2, sticky="W")
         box_co_b.bind("<Return>", self.set_contrast_b)
 
@@ -130,32 +135,34 @@ class DSRGraphicsGUI(Tk):
         self.saturation = StringVar()
         self.saturation.set(saved["saturation"])
         box_sat = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.saturation, width=15,
-                          command=self.set_saturation)
+                          command=self.set_saturation, increment=0.05)
         box_sat.grid(row=6, column=0, sticky="W")
         box_sat.bind("<Return>", self.set_saturation)
         self.hue = StringVar()
         self.hue.set(saved["hue"])
         box_hue = Spinbox(filter_, from_=-1000, to=1000, format="%.3f", textvariable=self.hue, width=15,
-                          command=self.set_hue)
+                          command=self.set_hue, increment=0.05)
         box_hue.grid(row=6, column=2, sticky="W")
         box_hue.bind("<Return>", self.set_hue)
 
         if saved["override f"]:
             self.set_override_filter()
 
-    def save_state(self):
-        DSRGraphicsGUI.SAVED_DATA["override f"] = self.override_filter.get()
-        DSRGraphicsGUI.SAVED_DATA["sync br"] = self.sync_brightness.get()
-        DSRGraphicsGUI.SAVED_DATA["sync co"] = self.sync_contrast.get()
-        DSRGraphicsGUI.SAVED_DATA["brightness r"] = self.brightness_r.get()
-        DSRGraphicsGUI.SAVED_DATA["contrast r"] = self.contrast_r.get()
-        DSRGraphicsGUI.SAVED_DATA["brightness g"] = self.brightness_g.get()
-        DSRGraphicsGUI.SAVED_DATA["contrast g"] = self.contrast_g.get()
-        DSRGraphicsGUI.SAVED_DATA["brightness b"] = self.brightness_b.get()
-        DSRGraphicsGUI.SAVED_DATA["contrast b"] = self.contrast_b.get()
-        DSRGraphicsGUI.SAVED_DATA["saturation"] = self.saturation.get()
-        DSRGraphicsGUI.SAVED_DATA["hue"] = self.hue.get()
-        dump(DSRGraphicsGUI.SAVED_DATA, open(DSRGraphicsGUI.SAVE_FILE, "wb"))
+    def save_config(self):
+        current_state = DSRGraphicsGUI.SAVED_DATA
+        save_file = DSRGraphicsGUI.SAVE_FILE
+        current_state["override f"] = self.override_filter.get()
+        current_state["sync br"] = self.sync_brightness.get()
+        current_state["sync co"] = self.sync_contrast.get()
+        current_state["brightness r"] = self.brightness_r.get()
+        current_state["contrast r"] = self.contrast_r.get()
+        current_state["brightness g"] = self.brightness_g.get()
+        current_state["contrast g"] = self.contrast_g.get()
+        current_state["brightness b"] = self.brightness_b.get()
+        current_state["contrast b"] = self.contrast_b.get()
+        current_state["saturation"] = self.saturation.get()
+        current_state["hue"] = self.hue.get()
+        dump(current_state, open(save_file, "wb"))
 
     def set_override_filter(self):
         self.process.override_filter(self.override_filter.get())
@@ -164,7 +171,7 @@ class DSRGraphicsGUI(Tk):
             self.set_brightness_g(), self.set_contrast_g()
             self.set_brightness_b(), self.set_contrast_b()
             self.set_saturation(), self.set_hue()
-        self.save_state()
+        self.save_config()
 
     def set_brightness_r(self, *e):
         if self.sync_brightness.get():
@@ -175,7 +182,7 @@ class DSRGraphicsGUI(Tk):
             float(self.brightness_g.get()),
             float(self.brightness_b.get())
         )
-        self.save_state()
+        self.save_config()
 
     def set_brightness_g(self, *e):
         if self.sync_brightness.get():
@@ -186,7 +193,7 @@ class DSRGraphicsGUI(Tk):
             float(self.brightness_g.get()),
             float(self.brightness_b.get())
         )
-        self.save_state()
+        self.save_config()
 
     def set_brightness_b(self, *e):
         if self.sync_brightness.get():
@@ -197,7 +204,7 @@ class DSRGraphicsGUI(Tk):
             float(self.brightness_g.get()),
             float(self.brightness_b.get())
         )
-        self.save_state()
+        self.save_config()
 
     def set_contrast_r(self, *e):
         if self.sync_contrast.get():
@@ -208,7 +215,7 @@ class DSRGraphicsGUI(Tk):
             float(self.contrast_g.get()),
             float(self.contrast_b.get())
         )
-        self.save_state()
+        self.save_config()
 
     def set_contrast_g(self, *e):
         if self.sync_contrast.get():
@@ -219,7 +226,7 @@ class DSRGraphicsGUI(Tk):
             float(self.contrast_g.get()),
             float(self.contrast_b.get())
         )
-        self.save_state()
+        self.save_config()
 
     def set_contrast_b(self, *e):
         if self.sync_contrast.get():
@@ -230,15 +237,15 @@ class DSRGraphicsGUI(Tk):
             float(self.contrast_g.get()),
             float(self.contrast_b.get())
         )
-        self.save_state()
+        self.save_config()
 
     def set_saturation(self, *e):
         self.process.set_saturation(float(self.saturation.get()))
-        self.save_state()
+        self.save_config()
 
     def set_hue(self, *e):
         self.process.set_hue(float(self.hue.get()))
-        self.save_state()
+        self.save_config()
 
     def set_draw_map(self):
         self.process.draw_map(self.draw_map.get())
@@ -258,10 +265,11 @@ class DSRGraphicsGUI(Tk):
 
 class DSRPositionGUI(Tk):
 
-    def __init__(self, process: DSRProcess):
+    def __init__(self, process: DSRProcess, debug=False):
 
         super(DSRPositionGUI, self).__init__()
 
+        self.debug = debug
         self.process = process
         self.exit_flag = False
 
@@ -315,16 +323,24 @@ class DSRPositionGUI(Tk):
         Thread(target=self.update).start()
 
     def update(self):
+        x, y, z, a = 0, 1, 2, 3
         while not self.exit_flag:
-            self.x_current.set("%.3f" % self.process.get_pos()[0])
-            self.x_stable.set("%.3f" % self.process.get_pos_stable()[0])
-            self.y_current.set("%.3f" % self.process.get_pos()[1])
-            self.y_stable.set("%.3f" % self.process.get_pos_stable()[1])
-            self.z_current.set("%.3f" % self.process.get_pos()[2])
-            self.z_stable.set("%.3f" % self.process.get_pos_stable()[2])
-            self.a_current.set("%.3f" % self.process.get_pos()[3])
-            self.a_stable.set("%.3f" % self.process.get_pos_stable()[3])
-            sleep(0.1)
+            try:
+                pos_current = self.process.get_pos()
+                pos_stable = self.process.get_pos_stable()
+                self.x_current.set("%.3f" % pos_current[x])
+                self.x_stable.set("%.3f" % pos_stable[x])
+                self.y_current.set("%.3f" % pos_current[y])
+                self.y_stable.set("%.3f" % pos_stable[y])
+                self.z_current.set("%.3f" % pos_current[z])
+                self.z_stable.set("%.3f" % pos_stable[z])
+                self.a_current.set("%.3f" % pos_current[a])
+                self.a_stable.set("%.3f" % pos_stable[a])
+            except RuntimeError:
+                if self.debug:
+                    print(Fore.RED + format_exc() + Fore.RESET)
+            finally:
+                sleep(0.016)
 
     def store(self):
         self.x_stored.set(self.x_current.get())
@@ -341,7 +357,7 @@ class DSRPositionGUI(Tk):
                 float(self.a_stored.get())
             )
         except ValueError as e:
-            print(e)
+            print(Fore.RED + (type(e).__name__ + ": " + str(e)) if not self.debug else format_exc() + Fore.RESET)
 
     def on_quit(self):
         self.exit_flag = True

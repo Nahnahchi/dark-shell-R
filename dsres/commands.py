@@ -1,15 +1,15 @@
 from itertools import chain
 
-DS_CATEGORY = {
+DSR_CATEGORY = {
     "weapon": None,
     "armor": None,
     "good": None,
     "ring": None,
 }
 
-DS_CUSTOM = {}
+DSR_CUSTOM = {}
 
-DS_ARMOR = {
+DSR_ARMOR = {
     "catarina-helm": None,
     "catarina-armor": None,
     "catarina-gauntlets": None,
@@ -252,7 +252,7 @@ DS_ARMOR = {
     "elite-cleric-leggings": None,
 }
 
-DS_GOOD = {
+DSR_GOOD = {
     "eye-of-death": None,
     "cracked-red-eye-orb": None,
     "elizabeth's-mushroom": None,
@@ -496,7 +496,7 @@ DS_GOOD = {
     "help-me!-carving": None
 }
 
-DS_WEAPON = {
+DSR_WEAPON = {
     "dagger": None,
     "parrying-dagger": None,
     "ghost-blade": None,
@@ -697,7 +697,7 @@ DS_WEAPON = {
 
 }
 
-DS_RING = {
+DSR_RING = {
     "havel's-ring": None,
     "red-tearstone-ring": None,
     "darkmoon-blade-covenant-ring": None,
@@ -741,7 +741,7 @@ DS_RING = {
     "calamity-ring": None
 }
 
-DS_MISC = {
+DSR_MISC = {
     "shaved": None,
     "receding": None,
     "short": None,
@@ -868,7 +868,27 @@ DS_MISC = {
     "phantom-bolt": None,
 }
 
-DS_BOOL = {
+DSR_MSG = {
+    "victory-achieved": None,
+    "you-died-1": None,
+    "humanity-restored": None,
+    "retrieval": None,
+    "target-destroyed": None,
+    "you-died-2": None,
+    "black-phantom-destroyed": None,
+    "current-location": None,
+    "magic-revived": None,
+    'ring-revival': None,
+    "rare-ring-revival": None,
+    "bonfire-lit": None,
+    "humanity-acquired": None,
+    "you-win": None,
+    "you-lose": None,
+    "draw": None,
+    "begin-match": None
+}
+
+DSR_BOOL = {
     "death-cam": None,
     "no-dead": None,
     "no-dead-all": None,
@@ -906,11 +926,9 @@ DS_BOOL = {
     "online-mode": None
 }
 
-DS_NEST = {
+DSR_NEST = {
     "clear": None,
     "exit": None,
-    "quit": None,
-    "end": None,
     "set": {
         "sls": None,
         "hum": None,
@@ -936,23 +954,38 @@ DS_NEST = {
         "status": None,
         "last-animation": None
     },
-    "enable": DS_BOOL,
-    "disable": DS_BOOL,
+    "enable": DSR_BOOL,
+    "disable": DSR_BOOL,
     "item-get": None,
     "item-get-upgrade": None,
     "item-mod": {
         "add": None,
-        "remove": DS_CUSTOM,
+        "remove": DSR_CUSTOM,
         "list": None,
         "clear": None
     },
     "unlock-all-gestures": None,
+    "notify": DSR_MSG,
     "game-restart": None,
-    "menu-kick": None,
+    "force-menu": None,
+    "on-flag": {
+        "notify": DSR_MSG,
+        "item-get": None
+    },
     "meta": {
+        "info": None,
+        "changelog": None,
+        "processes": {
+            "clear": {
+                "static": None,
+                "waiting": None
+            },
+            "list": None
+        },
         "open": {
             "appdata": None,
-            "cwd": None
+            "cwd": None,
+            "github": None
         }
     },
     "pos-gui": None,
@@ -1090,41 +1123,42 @@ DS_NEST = {
 def get_all_items():
     return dict(
         chain.from_iterable(
-            map(dict.items, [DS_CATEGORY, DS_WEAPON, DS_ARMOR, DS_GOOD, DS_RING, DS_MISC, DS_CUSTOM])
+            map(dict.items, [DSR_CATEGORY, DSR_WEAPON, DSR_ARMOR, DSR_GOOD, DSR_RING, DSR_MISC, DSR_CUSTOM])
         )
     )
 
 
 def get_upgradable_items():
-    return dict(chain.from_iterable(map(dict.items, [DS_WEAPON, DS_ARMOR])))
+    return dict(chain.from_iterable(map(dict.items, [DSR_WEAPON, DSR_ARMOR])))
 
 
 def nest_add(names: list):
-    DS_CUSTOM.update({name: None for name in names if name.strip()})
+    DSR_CUSTOM.update({name: None for name in names if name.strip()})
     nest_update()
 
 
 def nest_remove(name: str):
-    DS_CUSTOM.pop(name, None)
+    DSR_CUSTOM.pop(name, None)
     nest_update()
 
 
 def nest_reset():
-    DS_CUSTOM.clear()
+    DSR_CUSTOM.clear()
     nest_update()
 
 
 def nest_update():
-    DS_NEST["item-get"] = get_all_items()
-    DS_NEST["item-get-upgrade"] = get_upgradable_items()
+    DSR_NEST["item-get"] = get_all_items()
+    DSR_NEST["item-get-upgrade"] = get_upgradable_items()
+    DSR_NEST["on-flag"]["item-get"] = get_all_items()
 
 
 nest_update()
 
-DS_HELP = {
+DSR_HELP = {
     "help": {
-        command: None for command in DS_NEST.keys()
+        command: None for command in DSR_NEST.keys()
     }
 }
 
-DS_NEST.update(DS_HELP.copy())
+DSR_NEST.update(DSR_HELP.copy())

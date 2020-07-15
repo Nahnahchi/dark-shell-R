@@ -17,12 +17,15 @@ except FileExistsError:
     pass
 
 
-def open_appdata():
-    startfile(APPDATA)
-
-
-def open_cwd():
-    startfile(RES_DIR)
+def open_resource(args: list):
+    if "appdata" in args:
+        startfile(APPDATA)
+    if "cwd" in args:
+        startfile(RES_DIR)
+    if "github" in args:
+        import webbrowser
+        from _version import __github__
+        webbrowser.open(__github__)
 
 
 def get_item_dir():
@@ -118,3 +121,11 @@ def get_infusions():
 
 def get_covenants():
     return open("%s/covenants.txt" % join(RES_DIR, "misc"), "r").readlines()
+
+
+def get_banners():
+    return open("%s/banners.txt" % join(RES_DIR, "misc"), "r").readlines()
+
+
+def get_known_flags():
+    return open("%s/%s" % (RES_DIR, "flags"), "r").readlines()

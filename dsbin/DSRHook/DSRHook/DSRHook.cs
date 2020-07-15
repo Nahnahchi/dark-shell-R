@@ -8,6 +8,21 @@ using System.Text;
 
 namespace DarkShellRemastered
 {
+    public enum Stats : int
+    {   
+        VIT = 0,
+        ATN = 1,
+        END = 2,
+        STR = 3,
+        DEX = 4,
+        RES = 5,
+        INT = 6,
+        FTH = 7,
+        HUM = 8,
+        LVL = 9,
+        SLS = 10
+    }
+
     public class DSRHook : PHook
     {
         private DSROffsets Offsets;
@@ -33,22 +48,6 @@ namespace DarkShellRemastered
         private PHPointer EventFlags;
         private PHPointer AnimData;
         public PHPointer GameMan;
-
-
-        enum Stats: int
-        {
-            VIT = 0,
-            ATT = 1,
-            END = 2,
-            STR = 3,
-            DEX = 4,
-            RES = 5,
-            INT = 6,
-            FTH = 7,
-            HUM = 8,
-            LVL = 9,
-            SLS = 10
-        }
 
         public DSRHook(object caller, int refreshInterval, int minLifetime, string procesName) : base(caller, refreshInterval, minLifetime, p => p.MainWindowTitle == procesName)
         {
@@ -203,7 +202,7 @@ namespace DarkShellRemastered
             IntPtr stats = Kernel32.VirtualAllocEx(Handle, IntPtr.Zero, (IntPtr)0x300, 0x1000 | 0x2000, 0x4);
 
             Kernel32.WriteInt32(Handle, stats + 0x268 + 0x0, values[(int)Stats.VIT]);
-            Kernel32.WriteInt32(Handle, stats + 0x268 + 0x4, values[(int)Stats.ATT]);
+            Kernel32.WriteInt32(Handle, stats + 0x268 + 0x4, values[(int)Stats.ATN]);
             Kernel32.WriteInt32(Handle, stats + 0x268 + 0x8, values[(int)Stats.END]);
             Kernel32.WriteInt32(Handle, stats + 0x268 + 0xC, values[(int)Stats.STR]);
             Kernel32.WriteInt32(Handle, stats + 0x268 + 0x10, values[(int)Stats.DEX]);
@@ -697,7 +696,7 @@ namespace DarkShellRemastered
         }
         #endregion
 
-        #region Misc
+        #region Flags
         private static Dictionary<string, int> eventFlagGroups = new Dictionary<string, int>()
         {
             {"0", 0x00000},
@@ -766,10 +765,15 @@ namespace DarkShellRemastered
         }
         #endregion
 
-        #region Hotkeys
+        #region Menu
         public void MenuKick()
         {
             MenuMan.WriteInt32((int)DSROffsets.MenuMan.MenuKick, 2);
+        }
+
+        public void DisplayBanner(int value)
+        {
+            MenuMan.WriteInt32((int)DSROffsets.MenuMan.DisplayBanner, value);
         }
         #endregion
 

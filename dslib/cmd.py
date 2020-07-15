@@ -3,6 +3,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 from traceback import format_exc
 from colorama import Fore
+from time import sleep
 
 
 class CmdParser:
@@ -10,7 +11,7 @@ class CmdParser:
     def __init__(self, args: str):
         args = args.split()
         self.command = args[0] if len(args) > 0 else ""
-        self.arguments = args[1:] if len(args) > 1 else ""
+        self.arguments = args[1:] if len(args) > 1 else ["default"]
 
     def get_command(self):
         return self.command
@@ -21,8 +22,8 @@ class CmdParser:
 
 class DSRCmd:
 
-    com_prefix = "do_"
-    help_prefix = "help_"
+    com_prefix = "do"
+    help_prefix = "help"
     prompt_prefix = "~ "
 
     def __init__(self, debug=False):
@@ -32,7 +33,7 @@ class DSRCmd:
 
     @staticmethod
     def get_method_name(prefix: str, name: str):
-        return prefix + name.replace("-", "_")
+        return prefix.replace("-", "_") + "_" + name.replace("-", "_")
 
     def set_nested_completer(self, nest: dict):
         self.completer = NestedCompleter.from_nested_dict(nest)
@@ -81,10 +82,10 @@ class DSRCmd:
                     if com_name != "default":
                         commands.append(com_name.replace("_", "-"))
             commands.sort()
-            print("\n")
+            print(Fore.LIGHTYELLOW_EX)
             for command in commands:
                 print("\t%s" % command)
-            print("\n")
+            print(Fore.RESET)
 
     def do_default(self, args):
         if self.debug:

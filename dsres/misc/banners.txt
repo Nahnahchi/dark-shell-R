@@ -1,0 +1,17 @@
+1 victory-achieved
+2 you-died-1
+3 humanity-restored
+4 retrieval
+5 target-destroyed
+6 you-died-2
+7 black-phantom-destroyed
+8 current-location
+9 magic-revived
+10 ring-revival
+11 rare-ring-revival
+13 bonfire-lit
+14 humanity-acquired
+15 you-win
+16 you-lose
+17 draw
+18 begin-match

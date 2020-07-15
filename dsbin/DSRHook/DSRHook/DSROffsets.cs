@@ -169,6 +169,7 @@ namespace DarkShellRemastered
         public enum MenuMan
         {
             MenuKick = 0x24C,
+            DisplayBanner = 0x104
         }
 
         public const string ChrClassBaseAOB = "48 8B 05 ? ? ? ? 48 85 C0 ? ? F3 0F 58 80 AC 00 00 00";
