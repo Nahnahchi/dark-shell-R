@@ -1,4 +1,4 @@
-# dark-shell-R
+# DarkShellR
 This is a command line tool for testing and debugging DARK SOULS REMASTERED
 
 Type `help` for the list of commands and `help [command]` to see the usage and available options.
@@ -20,7 +20,7 @@ You can create custom items that you've modded into GameParams by either:
 OR
 - Adding it to the list of known items: `item-mod add`
 
-To start reading performed animations use `get last-animation`
+To start reading performed animations use `get last-animation`.
 
 If you want to get notified when an event flag reaches one of its states, you can use the `on-flag notify` command.
 You are also able to give yourself an item with `on-flag item-get [option]`.
