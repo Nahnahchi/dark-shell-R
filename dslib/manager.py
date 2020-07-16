@@ -96,13 +96,13 @@ class DarkSouls(DSRProcess):
                     text="Category of the new item:",
                     values=[(cat, cat.upper()) for cat in DarkSouls.ITEM_CATEGORIES.keys()]
                 ).run()
-                if not category.strip():
+                if category is None or not category.strip():
                     return False
                 item_id = input_dialog(
                     title="Enter item ID",
                     text="Item ID for the new %s:" % category
                 ).run()
-                if not item_id.strip():
+                if item_id is None or not item_id.strip():
                     return False
                 item_name = input_dialog(
                     title="Enter item name",
@@ -314,7 +314,7 @@ class DarkSouls(DSRProcess):
             title="Enter a flag ID",
             text="Event flag to listen to:"
         ).run()
-        if not flag_id.strip():
+        if flag_id is None or not flag_id.strip():
             raise RuntimeError()
         state = radiolist_dialog(
             title="Select flag state",
@@ -328,18 +328,21 @@ class DarkSouls(DSRProcess):
 
     def start_listen(self, pid: int, flag_id: int, state: bool, e: Event):
         try:
-            if self.listen_for_flag(flag_id, flag_state=state):
-                if pid in DarkSouls.WAITING_FUNC.keys():
-                    now = datetime.now().strftime("%H:%M:%S")
-                    print(Fore.LIGHTYELLOW_EX + ("[%s] " % now) + Fore.LIGHTCYAN_EX + "Wait for event flag" +
-                          Fore.LIGHTYELLOW_EX + (" %d " % flag_id) + Fore.LIGHTCYAN_EX + "has ended" + Fore.RESET)
-                    e.set()
-                    beep("ping" if random() > 0.5 else "wilhelm")
-                    DarkSouls.WAITING_FUNC.pop(pid)
-                    self.save_func()
+            self.listen_for_flag(flag_id, flag_state=state)
+            if pid in DarkSouls.WAITING_FUNC.keys():
+                now = datetime.now().strftime("%H:%M:%S")
+                print(Fore.LIGHTYELLOW_EX + ("[%s] " % now) + Fore.LIGHTCYAN_EX + "Event flag" +
+                      Fore.LIGHTYELLOW_EX + (" %d " % flag_id) + Fore.LIGHTCYAN_EX + "is" +
+                      (Fore.GREEN if state else Fore.RED) + (" %s" % ("ON" if state else "OFF")) + Fore.RESET)
+                e.set()
+                beep("ping" if random() > 0.5 else "wilhelm")
         except Exception as e:
             print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
                 type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
+        finally:
+            if pid in DarkSouls.WAITING_FUNC.keys():
+                DarkSouls.WAITING_FUNC.pop(pid)
+                self.save_func()
 
     def read_performed_animations(self):
         print(Fore.LIGHTBLUE_EX + "\n\tTime\t\tID" + Fore.RESET)

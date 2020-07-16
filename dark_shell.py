@@ -37,9 +37,9 @@ class DarkShell(DSRCmd):
         while True:
             wait_for(self.game_man.can_read)
             static_commands = DarkSouls.STATIC_FUNC.copy()
-            for func in static_commands.keys():
+            for func, args in static_commands.items():
                 try:
-                    self.game_man.switch(command=func[0], arguments=static_commands[func])
+                    self.game_man.switch(command=func[0], arguments=args)
                 except Exception as e:
                     print(Fore.RED + (format_exc() if _DEBUG else "%s in '%s' — %s" % (
                         type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
@@ -48,9 +48,8 @@ class DarkShell(DSRCmd):
     def _execute_waiting_commands(self, sync_execute: Event):
         sync_execute.wait()
         waiting_commands = DarkSouls.WAITING_FUNC.copy()
-        for evt_hash in waiting_commands:
+        for evt_hash, entry in waiting_commands.items():
             try:
-                entry = waiting_commands[evt_hash]
                 event = Event()
                 flag_id = entry["val"][0]
                 flag_state = entry["val"][1]
@@ -289,7 +288,7 @@ class DarkShell(DSRCmd):
 
     def do_notify(self, args):
         try:
-            banner_id = self.game_man.banners[args[0]] if args[0] != self.default else 12
+            banner_id = self.game_man.banners[args[0]] if len(args) > 0 and args[0] != self.default else 12
             self.game_man.display_banner(banner_id)
         except Exception as e:
             print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
