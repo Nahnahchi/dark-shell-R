@@ -1,3 +1,5 @@
+from random import choice
+from simpleaudio import WaveObject
 from os.path import join, isfile, exists, isdir
 from os import listdir, getcwd, getenv, makedirs, startfile
 import sys
@@ -7,6 +9,7 @@ SAVE_DIR = join(APPDATA, "save")
 MOD_DIR = join(APPDATA, "mod")
 RES_DIR = join(getattr(sys, '_MEIPASS', getcwd()), "dsres")
 
+
 try:
     makedirs(SAVE_DIR)
 except FileExistsError:
@@ -15,6 +18,10 @@ try:
     makedirs(MOD_DIR)
 except FileExistsError:
     pass
+
+
+def play_random_sound():
+    WaveObject.from_wave_file(join(get_sound_dir(), choice(get_sound_files()))).play()
 
 
 def open_resource(args: list):
@@ -30,6 +37,16 @@ def open_resource(args: list):
 
 def get_item_dir():
     return join(RES_DIR, "items")
+
+
+def get_sound_dir():
+    return join(RES_DIR, "sound")
+
+
+def get_sound_files():
+    sound_dir = get_sound_dir()
+    sound_files = [f for f in listdir(sound_dir) if isfile(join(sound_dir, f))]
+    return sound_files
 
 
 def get_mod_item_files():

@@ -4,12 +4,11 @@ from dslib.process import DSRProcess
 from dslib.cmd import DSRCmd
 from dsobj.bonfire import DSRBonfire
 from dsobj.item import DSRItem, DSRInfusion, Upgrade
-from dsres.resources import SAVE_DIR
+from dsres.resources import SAVE_DIR, play_random_sound
 from dsres.commands import nest_add, nest_remove, nest_reset
 from prompt_toolkit.shortcuts import set_title, input_dialog, radiolist_dialog, message_dialog, yes_no_dialog
 from os.path import join
 from sys import _getframe
-from beepy import beep
 from time import sleep
 from datetime import datetime
 from random import random
@@ -315,7 +314,7 @@ class DarkSouls(DSRProcess):
             text="Event flag to listen to:"
         ).run()
         if flag_id is None or not flag_id.strip():
-            raise RuntimeError()
+            raise ArgumentError("Wrong arguments!")
         state = radiolist_dialog(
             title="Select flag state",
             text="Desired state of event flag %s" % flag_id,
@@ -335,7 +334,7 @@ class DarkSouls(DSRProcess):
                       Fore.LIGHTYELLOW_EX + (" %d " % flag_id) + Fore.LIGHTCYAN_EX + "is" +
                       (Fore.GREEN if state else Fore.RED) + (" %s" % ("ON" if state else "OFF")) + Fore.RESET)
                 e.set()
-                beep("ping" if random() > 0.5 else "wilhelm")
+                play_random_sound()
         except Exception as e:
             print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
                 type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)

@@ -16,7 +16,8 @@ setup(
     description=pkg_vars["__description__"],
     python_requires="==3.7",
     install_requires=[
-        "prompt-toolkit>=3.0.0", "pythonnet", "PyGithub", "packaging", "colorama", "mttkinter", "beepy", "anyascii"
+        "prompt-toolkit>=3.0.0", "pythonnet", "PyGithub", "packaging",
+        "colorama", "mttkinter", "simpleaudio", "anyascii"
     ],
     dependency_links=[
         "https://github.com/prompt-toolkit/python-prompt-toolkit/tarball/master#egg=prompt-toolkit-3.0.5"
