@@ -24,4 +24,4 @@ To start reading performed animations use `get last-animation`.
 
 If you want to get notified when an event flag reaches one of its states, you can use the `on-flag notify` command.
 You are also able to give yourself an item with `on-flag item-get [option]`.
-`on-flag` should able to take every single command as an argument even if they're not listen with autocomplete.
+`on-flag` should be able to take every single command as an argument even if they're not listed with autocomplete.
