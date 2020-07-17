@@ -28,7 +28,7 @@ class DSRCmd:
     prompt_prefix = "~ "
 
     def __init__(self, debug=False):
-        self.debug = debug
+        self._debug = debug
         self.completer = None
         self.history = InMemoryHistory()
 
@@ -54,7 +54,7 @@ class DSRCmd:
                     arguments=parser.get_arguments()
                 )
             except KeyboardInterrupt:
-                if self.debug:
+                if self._debug:
                     print(Fore.RED + format_exc() + Fore.RESET)
 
     def execute_command(self, command, arguments):
@@ -66,7 +66,7 @@ class DSRCmd:
                 )
             )(arguments)
         except AttributeError as e:
-            print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
+            print(Fore.RED + (format_exc() if self._debug else "%s in '%s' — %s" % (
                 type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
 
     def do_help(self, args):
@@ -74,7 +74,7 @@ class DSRCmd:
             try:
                 getattr(self, DSRCmd.get_method_name(prefix=DSRCmd.help_prefix, name=args[0]))()
             except AttributeError as e:
-                print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
+                print(Fore.RED + (format_exc() if self._debug else "%s in '%s' — %s" % (
                     type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
         else:
             prefix = DSRCmd.get_method_name(prefix=DSRCmd.com_prefix, name="")
@@ -92,5 +92,5 @@ class DSRCmd:
             print(Fore.RESET)
 
     def do_default(self, args):
-        if self.debug:
+        if self._debug:
             print(Fore.BLUE + "time for crab" + Fore.RESET)

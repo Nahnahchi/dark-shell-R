@@ -9,24 +9,23 @@ __version__ = ".".join(__version_info__)
 __author__ = "Nahnahchi"
 __email__ = "nahnahchi@gmail.com"
 __description__ = "A command line interface for DARK SOULS REMASTERED"
-__github__ = "https://github.com/Nahnahchi/dark-shell-R"
+__repo__ = "Nahnahchi/dark-shell-R"
+__github__ = "https://github.com/" + __repo__
 
 
-class MetaInfoError(Exception):
+class MetaError(Exception):
 
     def __init__(self, reason, message="Error retrieving information"):
         self.message = message
         self.reason = str(reason)
-        super(MetaInfoError, self).__init__(self.message)
+        super(MetaError, self).__init__(self.message)
 
     def __str__(self):
         return self.message + " | " + self.reason
 
 
 def _get_releases():
-    gh = Github()
-    repo = gh.get_repo("Nahnahchi/dark-shell-R")
-    return repo.get_releases()
+    return Github().get_repo(__repo__).get_releases()
 
 
 def print_app_info():
@@ -43,7 +42,7 @@ def print_changelog():
             print(Fore.LIGHTCYAN_EX + "v" + release.tag_name +
                   Fore.LIGHTYELLOW_EX + anyascii(release.body).replace("- ", "\t"))
     except Exception as e:
-        raise MetaInfoError(e, message="Error retrieving changelog")
+        raise MetaError(e, message="Error retrieving changelog")
 
 
 def check_for_updates():
@@ -54,4 +53,4 @@ def check_for_updates():
         current = parse_version(__version__)
         return current >= available, max(current, available).base_version
     except Exception as e:
-        raise MetaInfoError(e, message="Couldn't check for the latest version")
+        raise MetaError(e, message="Couldn't check for the latest version")

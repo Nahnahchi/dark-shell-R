@@ -10,7 +10,7 @@ from dsres.resources import read_mod_items
 from dsres.commands import DSR_NEST, nest_add
 from colorama import Fore, init
 from traceback import format_exc
-from _version import __version__, check_for_updates, MetaInfoError
+from _version import __version__, check_for_updates, MetaError
 from prompt_toolkit.shortcuts import set_title
 
 _DEBUG = False
@@ -82,10 +82,6 @@ class DarkShell(DSRCmd):
         _exit(0)
 
     @staticmethod
-    def help_pos_gui():
-        pass
-
-    @staticmethod
     def help_meta():
         print(Fore.LIGHTBLUE_EX + "\nUsage:" + Fore.LIGHTYELLOW_EX + "\tmeta [option [option]]")
         print(Fore.LIGHTBLUE_EX + "\nOptions:" + Fore.LIGHTYELLOW_EX)
@@ -121,6 +117,10 @@ class DarkShell(DSRCmd):
             self.game_man.save_func()
         except Exception as e:
             print(Fore.RED + (format_exc() if _DEBUG else "%s: %s" % (type(e).__name__, e)) + Fore.RESET)
+
+    @staticmethod
+    def help_pos_gui():
+        pass
 
     def do_pos_gui(self, args):
         try:
@@ -330,9 +330,9 @@ if __name__ == "__main__":
     set_title("DarkShell-R")
     try:
         if _DEBUG:
-            raise MetaInfoError(reason="Skipping the update check", message="Debug State")
+            raise MetaError(reason="Skipping the update check", message="Debug State")
         is_latest, version = check_for_updates()
-    except MetaInfoError as ex:
+    except MetaError as ex:
         if _DEBUG:
             print(Fore.LIGHTYELLOW_EX + str(ex) + Fore.RESET)
         is_latest, version = True, __version__

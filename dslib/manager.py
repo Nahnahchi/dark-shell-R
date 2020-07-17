@@ -11,7 +11,6 @@ from os.path import join
 from sys import _getframe
 from time import sleep
 from datetime import datetime
-from random import random
 from threading import Thread, Event
 from collections import defaultdict
 from traceback import format_exc
@@ -36,7 +35,7 @@ class DarkSouls(DSRProcess):
 
     def __init__(self, debug=False):
         super(DarkSouls, self).__init__(DarkSouls.PROCESS_NAME, debug)
-        self.debug = debug
+        self._debug = debug
         self.bonfires = defaultdict(DSRBonfire)
         self.items = defaultdict(DSRItem)
         self.infusions = defaultdict(DSRInfusion)
@@ -95,7 +94,7 @@ class DarkSouls(DSRProcess):
                     text="Category of the new item:",
                     values=[(cat, cat.upper()) for cat in DarkSouls.ITEM_CATEGORIES.keys()]
                 ).run()
-                if category is None or not category.strip():
+                if category is None:
                     return False
                 item_id = input_dialog(
                     title="Enter item ID",
@@ -336,7 +335,7 @@ class DarkSouls(DSRProcess):
                 e.set()
                 play_random_sound()
         except Exception as e:
-            print(Fore.RED + (format_exc() if self.debug else "%s in '%s' — %s" % (
+            print(Fore.RED + (format_exc() if self._debug else "%s in '%s' — %s" % (
                 type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
         finally:
             if pid in DarkSouls.WAITING_FUNC.keys():
@@ -362,7 +361,7 @@ class DarkSouls(DSRProcess):
                 bonfire = DSRBonfire(b.strip())
                 self.bonfires[bonfire.get_name()] = bonfire
             except Exception as e:
-                print(Fore.RED + (format_exc() if self.debug else
+                print(Fore.RED + (format_exc() if self._debug else
                                   "%s: Error reading bonfire: %s | %s" %
                                   (type(e).__name__, b.split(), e)) + Fore.RESET)
 
@@ -379,12 +378,12 @@ class DarkSouls(DSRProcess):
                             item = DSRItem(i.strip(), int(category, 16))
                             self.items[item.get_name()] = item
                     except ValueError as e:
-                        print(Fore.RED + (format_exc() if self.debug else
+                        print(Fore.RED + (format_exc() if self._debug else
                                           "%s: Error reading item category in file '%s' | %s" %
                                           (type(e).__name__, file, e)) + Fore.RESET)
                         break
                     except Exception as e:
-                        print(Fore.RED + (format_exc() if self.debug else
+                        print(Fore.RED + (format_exc() if self._debug else
                                           "%s: Error reading item: %s | %s" %
                                           (type(e).__name__, i.title().split(), e)) + Fore.RESET)
                         continue
@@ -397,7 +396,7 @@ class DarkSouls(DSRProcess):
                 infusion = DSRInfusion(i.strip())
                 self.infusions[infusion.get_name()] = infusion
             except Exception as e:
-                print(Fore.RED + (format_exc() if self.debug else
+                print(Fore.RED + (format_exc() if self._debug else
                                   "%s: Error reading infusion: %s | %s" %
                                   (type(e).__name__, i.split(), e)) + Fore.RESET)
 
@@ -411,7 +410,7 @@ class DarkSouls(DSRProcess):
                 cov_name = covenant[1]
                 self.covenants[cov_name] = cov_id
             except Exception as e:
-                print(Fore.RED + (format_exc() if self.debug else
+                print(Fore.RED + (format_exc() if self._debug else
                                   "%s: Error reading covenant: %s | %s" %
                                   (type(e).__name__, c.split(), e)) + Fore.RESET)
 
@@ -425,7 +424,7 @@ class DarkSouls(DSRProcess):
                 banner_name = banner[1]
                 self.banners[banner_name] = banner_id
             except Exception as e:
-                print(Fore.RED + (format_exc() if self.debug else
+                print(Fore.RED + (format_exc() if self._debug else
                                   "%s: Error reading banner: %s | %s" %
                                   (type(e).__name__, b.split(), e)) + Fore.RESET)
 
@@ -435,6 +434,11 @@ class DarkSouls(DSRProcess):
             DarkSouls.STATIC_FUNC.clear()
         if "waiting" in args:
             DarkSouls.WAITING_FUNC.clear()
+
+    @staticmethod
+    def _test(args):
+        if "audio" in args:
+            play_random_sound()
 
     @staticmethod
     def manage_thread_info(args):
@@ -962,6 +966,10 @@ class DarkSouls(DSRProcess):
                     "val": (flag_id, state)
                 }
                 Thread(target=dsr.start_listen, args=(hash(evt), flag_id, state, evt)).start()
+
+            @staticmethod
+            def meta_test():
+                DarkSouls._test(arguments[1:])
 
             @staticmethod
             def meta_info():

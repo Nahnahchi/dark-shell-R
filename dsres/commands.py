@@ -986,6 +986,9 @@ DSR_NEST = {
             "appdata": None,
             "cwd": None,
             "github": None
+        },
+        "test": {
+            "audio": None
         }
     },
     "pos-gui": None,
