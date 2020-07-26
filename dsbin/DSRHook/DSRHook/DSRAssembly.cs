@@ -26,5 +26,6 @@ namespace DarkShellRemastered
         public static byte[] BonfireWarp = loadDefuseOutput(Properties.Resources.BonfireWarp);
         public static byte[] GetItem = loadDefuseOutput(Properties.Resources.GetItem);
         public static byte[] LevelUp = loadDefuseOutput(Properties.Resources.LevelUp);
+        public static string EnemyControl = Properties.Resources.EnemyControl;
     }
 }

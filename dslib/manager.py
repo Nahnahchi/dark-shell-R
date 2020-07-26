@@ -302,7 +302,7 @@ class DarkSouls(DSRProcess):
                 raise AssertionError(
                     "Can't determine the upgrade type for item '%s'!" % DarkSouls.get_name_from_arg(i_name)
                 )
-            if i_id <= item.get_id():
+            if not i_id <= item.get_id():
                 self.item_get(i_category, i_id, i_count)
                 print(Fore.GREEN + "Upgrade successful" + Fore.RESET)
 
@@ -716,6 +716,18 @@ class DarkSouls(DSRProcess):
                         DarkSouls.STATIC_FUNC.pop(key)
 
             @staticmethod
+            def enable_no_update():
+                enable = arguments[1]
+                dsr.set_no_update(enable)
+                print(Fore.GREEN + ("NO UPDATE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+                key = (command, arguments[0])
+                if enable:
+                    DarkSouls.STATIC_FUNC[key] = arguments
+                else:
+                    if key in DarkSouls.STATIC_FUNC.keys():
+                        DarkSouls.STATIC_FUNC.pop(key)
+
+            @staticmethod
             def enable_no_magic_all():
                 enable = arguments[1]
                 dsr.set_no_magic_all(enable)
@@ -957,6 +969,11 @@ class DarkSouls(DSRProcess):
                 enable = arguments[1]
                 dsr.enable_online_mode(enable)
                 print(Fore.GREEN + ("ONLINE MODE %s" % ("enabled" if enable else "disabled")) + Fore.RESET)
+
+            @staticmethod
+            def enable_enemy_control():
+                enable = arguments[1]
+                dsr.enable_enemy_control(enable)
 
             @staticmethod
             def on_flag_notify():

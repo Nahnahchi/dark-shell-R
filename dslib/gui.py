@@ -30,14 +30,15 @@ class DSRGraphicsGUI(Tk):
 
         super(DSRGraphicsGUI, self).__init__()
 
+        self._debug = debug
+
         try:
             saved = load(open(DSRGraphicsGUI.SAVE_FILE, "rb"))
         except (UnpicklingError, FileNotFoundError, EOFError):
             saved = DSRGraphicsGUI.SAVED_DATA
-            if debug:
+            if self._debug:
                 print(Fore.RED + format_exc() + Fore.RESET)
 
-        self.debug = debug
         self.process = process
 
         self.title("GraphicsGUI")
@@ -269,7 +270,7 @@ class DSRPositionGUI(Tk):
 
         super(DSRPositionGUI, self).__init__()
 
-        self.debug = debug
+        self._debug = debug
         self.process = process
         self.exit_flag = False
 
@@ -337,7 +338,7 @@ class DSRPositionGUI(Tk):
                 self.a_current.set("%.3f" % pos_current[a])
                 self.a_stable.set("%.3f" % pos_stable[a])
             except RuntimeError:
-                if self.debug:
+                if self._debug:
                     print(Fore.RED + format_exc() + Fore.RESET)
             finally:
                 sleep(0.016)
@@ -357,7 +358,7 @@ class DSRPositionGUI(Tk):
                 float(self.a_stored.get())
             )
         except ValueError as e:
-            print(Fore.RED + (type(e).__name__ + ": " + str(e)) if not self.debug else format_exc() + Fore.RESET)
+            print(Fore.RED + (type(e).__name__ + ": " + str(e)) if not self._debug else format_exc() + Fore.RESET)
 
     def on_quit(self):
         self.exit_flag = True

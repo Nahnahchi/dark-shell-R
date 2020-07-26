@@ -4,3 +4,6 @@
 [submodule "dsbin/PropertyHook"]
 	path = dsbin/PropertyHook
 	url = https://github.com/Nahnahchi/PropertyHook.git
+[submodule "dsbin/CheatEngineLibrary"]
+	path = dsbin/CheatEngineLibrary
+	url = https://github.com/fenix01/cheatengine-library.git

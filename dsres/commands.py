@@ -904,6 +904,7 @@ DSR_BOOL = {
     "no-update-ai-all": None,
     "no-magic-all": None,
     "no-ammo-consume-all": None,
+    "enemy-control": None,
     "super-armor": None,
     "gravity": None,
     "player-dead-mode": None,

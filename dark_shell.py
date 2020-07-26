@@ -324,9 +324,6 @@ if __name__ == "__main__":
                 print("\t%s" % str(f))
             exit()
     print(Fore.LIGHTYELLOW_EX + "Loading..." + Fore.RESET)
-    if not _DEBUG:
-        DarkSouls.warn_anti_cheat()
-        DarkShell.do_clear(args=[])
     set_title("DarkShell-R")
     try:
         if _DEBUG:
@@ -336,6 +333,9 @@ if __name__ == "__main__":
         if _DEBUG:
             print(Fore.LIGHTYELLOW_EX + str(ex) + Fore.RESET)
         is_latest, version = True, __version__
+    if not _DEBUG:
+        DarkSouls.warn_anti_cheat()
+        DarkShell.do_clear(args=[])
     print(Fore.LIGHTBLUE_EX + "Welcome to DarkShell %s%s" % (
         "v" + __version__, (" (v%s is available)" % version) if not is_latest else "" + Fore.RESET))
     try:

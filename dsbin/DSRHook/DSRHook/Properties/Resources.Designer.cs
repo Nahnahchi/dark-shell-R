@@ -79,6 +79,47 @@ namespace DarkShellRemastered.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [ENABLE]
+        ///
+        ///alloc(EntityPtr,8)
+        ///registersymbol(EntityPtr)
+        ///
+        /////MOVEMENT
+        /////aobscanmodule(StopMyChr,DarkSoulsRemastered.exe,41 0F 28 6E 10 0F 28 87)
+        ///alloc(newmem1,1024,{StopMyChr})
+        ///
+        ///alloc(FreeMem,16)
+        ///registersymbol(FreeMem)
+        ///
+        ///alloc(HpCheck,1)
+        ///registersymbol(HpCheck)
+        ///
+        ///label(code1)
+        ///label(MyChr)
+        ///label(return1)
+        ///label(HpQ)
+        ///
+        ///newmem1:
+        ///
+        ///  push r15
+        ///  mov r15,[EntityPtr]
+        ///  cmp dword ptr [r15+3E8],00
+        ///  je HpQ
+        ///  pop r15
+        ///
+        ///  mov byte ptr [HpCheck],00
+        ///
+        ///  push r15
+        ///  mov r15,[{WorldChrBase}]
+        ///  mov r1 [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string EnemyControl {
+            get {
+                return ResourceManager.GetString("EnemyControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 0:  ba fe fe fe fe          mov    edx,0xfefefefe
         ///5:  41 b9 fe fe fe fe       mov    r9d,0xfefefefe
         ///b:  41 b8 fe fe fe fe       mov    r8d,0xfefefefe
@@ -103,7 +144,7 @@ namespace DarkShellRemastered.Properties {
         ///a:  48 b9 00 00 00 00 ff    movabs rcx,0xffffffff00000000
         ///11: ff ff ff
         ///14: 48 83 ec 38             sub    rsp,0x38
-        ///18: 49 be 20 99 68 40 01    movabs r14,0x140695890
+        ///18: 49 be 90 58 69 40 01    movabs r14,0x140695890
         ///1f: 00 00 00
         ///22: 41 ff d6                call   r14
         ///25: 48 83 c4 38             add    rsp,0x38

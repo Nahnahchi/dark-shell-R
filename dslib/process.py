@@ -155,6 +155,10 @@ class DSRProcess:
         if not self._hook.SetPlayerNoDead(enable):
             raise WriteMemoryError()
 
+    def set_no_update(self, enable: bool):
+        if not self._hook.SetNoUpdate(enable):
+            raise WriteMemoryError()
+
     def set_no_stamina_consume(self, enable: bool):
         if not self._hook.SetPlayerNoStamina(enable):
             raise WriteMemoryError()
@@ -395,3 +399,6 @@ class DSRProcess:
     def enable_online_mode(self, enable: bool):
         if not self._hook.EnableOnlineMode(enable):
             raise WriteMemoryError()
+
+    def enable_enemy_control(self, enable: bool):
+        self._hook.EnableEnemyControl(enable)

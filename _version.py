@@ -31,7 +31,7 @@ def _get_releases():
 def print_app_info():
     print(Fore.LIGHTCYAN_EX + ("\n\t%s v%s — %s\n" % (__app_name__, __version__, __description__)))
     print(Fore.LIGHTBLUE_EX + "\tAuthor:" + Fore.LIGHTYELLOW_EX + ("\t%s" % __author__))
-    print(Fore.LIGHTBLUE_EX + "\temail:" + Fore.LIGHTYELLOW_EX + ("\t%s" % __email__))
+    print(Fore.LIGHTBLUE_EX + "\te-mail:" + Fore.LIGHTYELLOW_EX + ("\t%s" % __email__))
     print(Fore.LIGHTBLUE_EX + "\tGitHub:" + Fore.LIGHTYELLOW_EX + ("\t%s\n" % __github__))
 
 

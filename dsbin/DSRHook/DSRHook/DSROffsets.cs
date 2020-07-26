@@ -243,6 +243,22 @@ namespace DarkShellRemastered
             IsOnlineMode = 0xB7D,
         }
 
+        public const string StopMyChrAOB = "41 0F 28 6E 10 0F 28 87";
+        public const int StopMyChrOffset = 0;
+        public const string EntityAngleAOB = "0F 29 21 C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC";
+        public const int EntityAngleOffset = 0;
+        public const string EntityCamAOB = "0F 28 49 40 66 0F 7F 42 20 66 0F 7F 4A 30 C3 48";
+        public const int EntityCamOffset = 0;
+        public const string DownArrowInputAOB = "8B 49 2C 83 F9 FF";
+        public const int DownArrowInputOffset = 0;
+        public const string ArrowUpInputAOB = "33 D2 48 83 C1 18 83";
+        public const int ArrowUpInputOffset = 0;
+        public const string GamepadYInputAOB = "39 10 0F 45 FA 32 DB 39 10";
+        public const int GamepadYInputOffset = 0;
+        public const string EnemyAttacksAOB = "89 83 28 05 00 00 0F";
+        public const int EnemyAttacksOffset = 0;
+
+
         public static DSROffsets GetOffsets(int moduleSize)
         {
             DSROffsets result = new DSROffsets();

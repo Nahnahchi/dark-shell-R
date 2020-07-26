@@ -5,6 +5,9 @@ using static System.Text.Encoding;
 using System.Threading;
 using PropertyHookCustom;
 using System.Text;
+using CheatEngine;
+using System.Net;
+using System.Linq;
 
 namespace DarkShellRemastered
 {
@@ -26,6 +29,7 @@ namespace DarkShellRemastered
     public class DSRHook : PHook
     {
         private DSROffsets Offsets;
+        private CheatEngineLibrary CELib;
 
         private PHPointer GroupMaskAddr;
         private PHPointer ChrDbgAddr;
@@ -47,11 +51,21 @@ namespace DarkShellRemastered
         private PHPointer MenuMan;
         private PHPointer EventFlags;
         private PHPointer AnimData;
-        public PHPointer GameMan;
+        private PHPointer GameMan;
+
+        private PHPointer StopMyChr;
+        private PHPointer EntityAngle;
+        private PHPointer EntityCam;
+        private PHPointer DownArrowInput;
+        private PHPointer ArrowUpInput;
+        private PHPointer GamepadYInput;
+        private PHPointer EnemyAttacks;
 
         public DSRHook(object caller, int refreshInterval, int minLifetime, string procesName) : base(caller, refreshInterval, minLifetime, p => p.MainWindowTitle == procesName)
         {
             Offsets = new DSROffsets();
+            CELib = new CheatEngineLibrary();
+
             CamMan = RegisterRelativeAOB(DSROffsets.CamManBaseAOB, 3, 7, DSROffsets.CamManOffset);
             ChrFollowCam = RegisterRelativeAOB(DSROffsets.ChrFollowCamAOB, 3, 7, DSROffsets.ChrFollowCamOffset1, DSROffsets.ChrFollowCamOffset2, DSROffsets.ChrFollowCamOffset3);
             GroupMaskAddr = RegisterRelativeAOB(DSROffsets.GroupMaskAOB, 2, 7);
@@ -67,7 +81,15 @@ namespace DarkShellRemastered
             ChrData3 = RegisterRelativeAOB(DSROffsets.ChrData3AOB, 3, 7, DSROffsets.ChrData3Offset);
             AnimData = RegisterRelativeAOB(DSROffsets.AnimDataAOB, 3, 7, DSROffsets.AnimDataOffset0, DSROffsets.AnimDataOffset1, DSROffsets.AnimDataOffset2, DSROffsets.AnimDataOffset3);
             GameMan = RegisterRelativeAOB(DSROffsets.GameManAOB, 3, 7, DSROffsets.GameManOffset);
-            
+
+            StopMyChr = RegisterAbsoluteAOB(DSROffsets.StopMyChrAOB);
+            EntityAngle = RegisterAbsoluteAOB(DSROffsets.EntityAngleAOB);
+            EntityCam = RegisterAbsoluteAOB(DSROffsets.EntityCamAOB);
+            DownArrowInput = RegisterAbsoluteAOB(DSROffsets.DownArrowInputAOB);
+            ArrowUpInput = RegisterAbsoluteAOB(DSROffsets.ArrowUpInputAOB);
+            GamepadYInput = RegisterAbsoluteAOB(DSROffsets.GamepadYInputAOB);
+            EnemyAttacks = RegisterAbsoluteAOB(DSROffsets.EnemyAttacksAOB);
+
             ChrData1 = CreateChildPointer(WorldChrBase, (int)DSROffsets.WorldChrBase.ChrData1);
             ChrMapData = CreateBasePointer(IntPtr.Zero);
             ChrAnimData = CreateBasePointer(IntPtr.Zero);
@@ -79,9 +101,19 @@ namespace DarkShellRemastered
         public void DSRHook_OnHooked()
         {
             Offsets = DSROffsets.GetOffsets(Process.MainModule.ModuleMemorySize);
+            
+            CELib.loadEngine();
+
             ChrMapData = CreateChildPointer(ChrData1, (int)DSROffsets.ChrData1.ChrMapData + Offsets.ChrData1Boost1);
             ChrAnimData = CreateChildPointer(ChrMapData, (int)DSROffsets.ChrMapData.ChrAnimData);
             ChrPosData = CreateChildPointer(ChrMapData, (int)DSROffsets.ChrMapData.ChrPosData);
+
+            CELib.iOpenProcess(Process.Id.ToString("X"));
+        }
+
+        public void DSRHook_OnUnhooked()
+        {
+            CELib.unloadEngine();
         }
 
         private static readonly Dictionary<int, string> VersionStrings = new Dictionary<int, string>
@@ -382,6 +414,59 @@ namespace DarkShellRemastered
             return Execute(asm);
         }
 
+        public static string StringToByteArray(string hex)
+        {
+            if (hex.Length % 2 == 1)
+                hex = "0" + hex;
+
+            string[] arr = new string[hex.Length >> 1];
+
+            for (int i = 0; i < hex.Length >> 1; ++i)
+            {
+                arr[i] = ((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1]))).ToString("X");
+            }
+
+            for (int i = 0; i < arr.Length; i++)
+            {
+                if (arr[i].Length == 1)
+                {
+                    arr[i] = "0" + arr[i];
+                }
+            }
+
+            return string.Join(" ", arr.Reverse());
+        }
+
+        public static int GetHexVal(char hex)
+        {
+            int val = (int)hex;
+            //For uppercase A-F letters:
+            //return val - (val < 58 ? 48 : 55);
+            //For lowercase a-f letters:
+            //return val - (val < 58 ? 48 : 87);
+            //Or the two combined, but a bit slower:
+            return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
+        }
+
+        public void EnableEnemyControl(bool value)
+        {
+            string script = DSRAssembly.EnemyControl;
+            
+            script = script.Replace("{WorldChrBase}", WorldChrBase.Resolve().ToString("X"))
+                           .Replace("{StopMyChr}", StopMyChr.Resolve().ToString("X"))
+                           .Replace("{EntityAngle}", EntityAngle.Resolve().ToString("X"))
+                           .Replace("{EntityCam}", EntityCam.Resolve().ToString("X"))
+                           .Replace("{DownArrowInput}", DownArrowInput.Resolve().ToString("X"))
+                           .Replace("{ArrowUpInput}", ArrowUpInput.Resolve().ToString("X"))
+                           .Replace("{GamepadYInput})", GamepadYInput.Resolve().ToString("X"))
+                           .Replace("{EnemyAttacks}", EnemyAttacks.Resolve().ToString("X"));
+
+            Console.WriteLine(script);
+
+            CELib.iAddScript("EnemyControl", script);
+            CELib.iActivateRecord(0, value);
+        }
+
         public bool SetAnimSpeed(float value)
         {
             return ChrAnimData.WriteSingle((int)DSROffsets.ChrAnimData.AnimSpeed, value);
@@ -572,6 +657,11 @@ namespace DarkShellRemastered
         public bool SetPlayerSuperArmor(bool value)
         {
             return ChrData1.WriteFlag32((int)DSROffsets.ChrData1.ChrFlags1 + Offsets.ChrData1Boost1, (uint)DSROffsets.ChrFlags1.SetSuperArmor, value);
+        }
+
+        public bool SetNoUpdate(bool value)
+        {
+            return ChrData1.WriteFlag32((int)DSROffsets.ChrData1.ChrFlags2 + Offsets.ChrData1Boost2, (uint)DSROffsets.ChrFlags2.NoUpdate, value);
         }
 
         public bool SetPlayerHide(bool value)

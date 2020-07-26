@@ -1,0 +1,475 @@
+[ENABLE]
+
+alloc(EntityPtr,8)
+registersymbol(EntityPtr)
+
+//MOVEMENT
+//aobscanmodule(StopMyChr,DarkSoulsRemastered.exe,41 0F 28 6E 10 0F 28 87)
+define(StopMyChr,{StopMyChr})
+alloc(newmem1,1024,StopMyChr)
+
+alloc(FreeMem,16)
+registersymbol(FreeMem)
+
+alloc(HpCheck,1)
+registersymbol(HpCheck)
+
+label(code1)
+label(MyChr)
+label(return1)
+label(HpQ)
+
+newmem1:
+
+  push r15
+  mov r15,[EntityPtr]
+  cmp dword ptr [r15+3E8],00
+  je HpQ
+  pop r15
+
+  mov byte ptr [HpCheck],00
+
+  push r15
+  mov r15,[{WorldChrBase}]
+  mov r15,[r15+68]
+  mov r15,[r15+68]
+  mov r15,[r15+88]
+  cmp r14,r15
+  pop r15
+  je MyChr
+  push r15
+  mov r15,[EntityPtr]
+  mov r15,[r15+68]
+  mov r15,[r15+88]
+  cmp r14,r15
+  pop r15
+  jne code1
+
+  push r15
+  mov r15,[{WorldChrBase}]
+  mov r15,[r15+68]
+  mov r15,[r15+68]
+  mov r15,[r15+88]
+  movaps xmm5,[r15+10]
+  mov r15,[EntityPtr]
+  mov r15,[r15+68]
+  mov r15,[r15+28]
+  movaps xmm15,[r15+10]
+  mov r15,[EntityPtr]
+  movdqu [r15+120],xmm15
+  xorps xmm15,xmm15
+  pop r15
+
+  jmp return1
+MyChr:
+  movaps xmm5,[FreeMem]
+  jmp return1
+HpQ:
+  mov byte ptr [HpCheck],01
+  pop r15
+code1:
+  movaps xmm5,[r14+10]
+  jmp return1
+
+StopMyChr:
+  jmp newmem1
+return1:
+registersymbol(StopMyChr)
+
+//ANGLE
+//aobscanmodule(EntityAngle,DarkSoulsRemastered.exe,0F 29 21 C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC)
+define(EntityAngle,{EntityAngle})
+alloc(newmem3,512,EntityAngle)
+
+label(code3)
+label(return3)
+
+newmem3:
+  cmp byte ptr [HpCheck],01
+  je code3
+
+  push r15
+  mov r15,[EntityPtr]
+  mov r15,[r15+68]
+  mov r15,[r15+28]
+  cmp rcx,r15
+  pop r15
+  jne code3
+  push r15
+  mov r15,[{WorldChrBase}]
+  mov r15,[r15+68]
+  mov r15,[r15+68]
+  mov r15,[r15+28]
+  movaps xmm4,[r15]
+  pop r15
+code3:
+  movaps [rcx],xmm4
+  ret
+  int 3
+  jmp return3
+
+EntityAngle:
+  jmp newmem3
+return3:
+registersymbol(EntityAngle)
+
+//CAM
+//aobscanmodule(EntityCam,DarkSoulsRemastered.exe,0F 28 49 40 66 0F 7F 42 20 66 0F 7F 4A 30 C3 48)
+define(EntityCam,{EntityCam})
+alloc(newmem11,512,EntityCam)
+
+label(code11)
+label(return11)
+
+globalalloc(VectorAoB,8)
+
+VectorAoB:
+dd (float)0 //Z Offset
+dd (float)3.5 //Vector Multiplier
+
+newmem11:
+  cmp byte ptr [HpCheck],01
+  je code11
+
+  push r14
+  push r15
+  mov r14,[EntityPtr]
+  mov r14,[r14+68]
+  mov r15,[r14+28]
+  mov r14,[r14+30]
+  fld dword ptr [r14+110]
+  fld dword ptr [r14+114]
+  fld dword ptr [r14+118]
+  fld dword ptr [r15+04]
+  fld dword ptr [r15+04]
+  fsin
+  fmul dword ptr [VectorAoB+04]
+  faddp st(4),st(0)
+  fcos
+  fmul dword ptr [VectorAoB+04]
+  faddp st(1),st(0)
+  fstp dword ptr [rcx+48]
+  fadd dword ptr [VectorAoB]
+  fstp dword ptr [rcx+44]
+  fstp dword ptr [rcx+40]
+  pop r15
+  pop r14
+
+code11:
+  movaps xmm1,[rcx+40]
+  movdqa [rdx+20],xmm0
+  jmp return11
+
+EntityCam:
+  jmp newmem11
+  nop
+  nop
+  nop
+  nop
+return11:
+registersymbol(EntityCam)
+
+//SOME INPUT DATA
+
+[[[[{WorldChrBase}]+68]+68]+88]+1CC:
+  db 00
+
+[[[[{WorldChrBase}]+68]+68]+88]+1D0:
+  db 00
+
+//aobscanmodule(DownArrowInput,DarkSoulsRemastered.exe,8B 49 2C 83 F9 FF)
+define(DownArrowInput,{DownArrowInput})
+alloc(newmemD,128,DownArrowInput)
+
+alloc(InputFlags,3)
+registersymbol(InputFlags)
+
+label(codeD)
+label(returnD)
+
+newmemD:
+  cmp byte ptr [HpCheck],01
+  je codeD
+
+  mov byte ptr [InputFlags],01
+codeD:
+  mov ecx,[rcx+2C]
+  cmp ecx,-01
+  jmp returnD
+
+DownArrowInput:
+  jmp newmemD
+  nop
+returnD:
+registersymbol(DownArrowInput)
+
+//aobscanmodule(ArrowUpInput,DarkSoulsRemastered.exe,33 D2 48 83 C1 18 83)
+define(ArrowUpInput,{ArrowUpInput})
+alloc(newmemU,128,ArrowUpInput)
+
+label(codeU)
+label(returnU)
+
+newmemU:
+  cmp byte ptr [HpCheck],01
+  je codeU
+
+  mov byte ptr [InputFlags+01],01
+codeU:
+  xor edx,edx
+  add rcx,18
+  jmp returnU
+
+ArrowUpInput:
+  jmp newmemU
+  nop
+returnU:
+registersymbol(ArrowUpInput)
+
+//aobscanmodule(GamepadYInput,DarkSoulsRemastered.exe,39 10 0F 45 FA 32 DB 39 10)
+define(GamepadYInput,{GamepadYInput})
+alloc(newmemYT,128,GamepadYInput)
+
+label(codeYT)
+label(returnYT)
+
+newmemYT:
+  mov byte ptr [InputFlags+02],01
+codeYT:
+  cmp [rax],edx
+  cmovne edi,edx
+  jmp returnYT
+
+GamepadYInput:
+  jmp newmemYT
+returnYT:
+registersymbol(GamepadYInput)
+
+//ATTACKS
+//aobscanmodule(EnemyAttacks,DarkSoulsRemastered.exe,89 83 28 05 00 00 0F)
+define(EnemyAttacks,{EnemyAttacks})
+alloc(newmem4,1024,EnemyAttacks)
+
+alloc(AttacksData,64)
+registersymbol(AttacksData)
+
+label(code4)
+label(return4)
+
+label(gamepadRB)
+label(gamepadLB)
+label(gamepadRT)
+label(gamepadLT)
+
+label(GAMEPAD_X)
+label(GAMEPAD_A)
+label(GAMEPAD_B)
+label(GAMEPAD_Y)
+
+label(ARROW_LEFT)
+label(ARROW_DOWN)
+label(ARROW_RIGHT)
+label(ARROW_UP)
+
+newmem4:
+  cmp byte ptr [HpCheck],01
+  je code4
+
+  push r15
+  mov r15,[EntityPtr]
+  mov r15,[r15+68]
+  mov r15,[r15+48]
+  cmp rbx,r15
+  pop r15
+  jne code4
+  push r15
+  push r14
+  mov r15,[{WorldChrBase}]
+  mov r15,[r15+68]
+  mov r15,[r15+68]
+  mov r15,[r15+88]
+
+  cmp byte ptr [r15+84],01 //gamepadRB
+  je gamepadRB
+
+  cmp byte ptr [r15+97],01 //gamepadLB
+  je gamepadLB
+
+  cmp byte ptr [r15+89],01 //gamepadRT
+  je gamepadRT
+
+  cmp byte ptr [r15+98],01 //gamepadLT
+  je gamepadLT
+
+  cmp byte ptr [r15+8E],01 //GAMEPAD_B
+  je GAMEPAD_B
+
+  cmp byte ptr [r15+92],01 //GAMEPAD_X
+  je GAMEPAD_X
+
+  cmp byte ptr [InputFlags+02],01 //GAMEPAD_Y
+  je GAMEPAD_Y
+
+  cmp byte ptr [r15+1C5],01 //GAMEPAD_A
+  je GAMEPAD_A
+
+  cmp byte ptr [r15+1CC],00 //LEFT ARROW
+  jg ARROW_LEFT
+
+  cmp byte ptr [r15+1D0],00 //RIGHT ARROW
+  jg ARROW_RIGHT
+
+  cmp byte ptr [InputFlags+01],01 //ARROW_UP
+  je ARROW_UP
+
+  cmp byte ptr [InputFlags],01 //ARROW_DOWN
+  je ARROW_DOWN
+
+  pop r14
+  pop r15
+
+  jmp return4
+gamepadRB:
+  mov eax,[AttacksData]
+  pop r14
+  pop r15
+  jmp code4
+gamepadLB:
+  mov eax,[AttacksData+04]
+  pop r14
+  pop r15
+  jmp code4
+gamepadRT:
+  mov eax,[AttacksData+08]
+  pop r14
+  pop r15
+  jmp code4
+gamepadLT:
+  mov eax,[AttacksData+0C]
+  pop r14
+  pop r15
+  jmp code4
+GAMEPAD_X:
+  mov eax,[AttacksData+10]
+  pop r14
+  pop r15
+  jmp code4
+GAMEPAD_A:
+  mov eax,[AttacksData+14]
+  pop r14
+  pop r15
+  jmp code4
+GAMEPAD_B:
+  mov eax,[AttacksData+18]
+  pop r14
+  pop r15
+  jmp code4
+GAMEPAD_Y:
+  mov byte ptr [InputFlags+02],00
+  mov eax,[AttacksData+1C]
+  pop r14
+  pop r15
+  jmp code4
+ARROW_UP:
+  mov byte ptr [InputFlags+01],00
+  mov eax,[AttacksData+20]
+  pop r14
+  pop r15
+  jmp code4
+ARROW_DOWN:
+  mov byte ptr [InputFlags],00
+  mov eax,[AttacksData+24]
+  pop r14
+  pop r15
+  jmp code4
+ARROW_LEFT:
+  mov byte ptr [r15+1CC],00
+  mov eax,[AttacksData+28]
+  pop r14
+  pop r15
+  jmp code4
+ARROW_RIGHT:
+  mov byte ptr [r15+1D0],00
+  mov eax,[AttacksData+2C]
+  pop r14
+  pop r15
+  jmp code4
+code4:
+  mov [rbx+00000528],eax
+  jmp return4
+
+EnemyAttacks:
+  jmp newmem4
+  nop
+return4:
+registersymbol(EnemyAttacks)
+
+AttacksData:
+ dd #3000 //gamepadRB
+ dd #3001 //gamepadLB
+ dd #3002 //gamepadRT
+ dd #3003 //gamepadLT
+ dd #3004 //gamepadX
+ dd #3005 //gamepadA
+ dd #3006 //gamepadB
+ dd #3007 //gamepadY
+ dd #3010 //arrowUp
+ dd #701  //arrowDown
+ dd #3008 //arrowLeft
+ dd #3009 //arrowRight
+
+[DISABLE]
+
+StopMyChr:
+  db 41 0F 28 6E 10
+
+unregistersymbol(StopMyChr)
+dealloc(newmem1)
+
+EntityAngle:
+  db 0F 29 21 C3 CC
+
+unregistersymbol(EntityAngle)
+dealloc(newmem3)
+
+EnemyAttacks:
+  db 89 83 28 05 00 00
+
+unregistersymbol(EnemyAttacks)
+dealloc(newmem4)
+
+EntityCam:
+  db 0F 28 49 40 66 0F 7F 42 20
+
+unregistersymbol(EntityCam)
+dealloc(newmem11)
+
+dealloc(AttacksData)
+unregistersymbol(AttacksData)
+
+dealloc(InputFlags)
+unregistersymbol(InputFlags)
+
+DownArrowInput:
+  db 8B 49 2C 83 F9 FF
+
+unregistersymbol(DownArrowInput)
+dealloc(newmemD)
+
+ArrowUpInput:
+  db 33 D2 48 83 C1 18
+
+unregistersymbol(ArrowUpInput)
+dealloc(newmemU)
+
+dealloc(HpCheck)
+unregistersymbol(HpCheck)
+
+dealloc(VectorAoB)
+unregistersymbol(VectorAoB)
+
+GamepadYInput:
+  db 39 10 0F 45 FA
+
+unregistersymbol(GamepadYInput)
+dealloc(newmemYT)
