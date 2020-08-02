@@ -1,5 +1,5 @@
 # DarkShellR
-This is a command line tool for testing and debugging DARK SOULS REMASTERED
+This is a command line multi-tool for testing and debugging DARK SOULS REMASTERED
 
 Type `help` for the list of commands and `help [command]` to see the usage and available options.
 
