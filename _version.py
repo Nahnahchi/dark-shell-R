@@ -4,7 +4,7 @@ from anyascii import anyascii
 from colorama import Fore
 
 __app_name__ = "DarkShell-R"
-__version_info__ = ("1", "3", "1")
+__version_info__ = ("1", "3", "2")
 __version__ = ".".join(__version_info__)
 __author__ = "Nahnahchi"
 __email__ = "nahnahchi@gmail.com"

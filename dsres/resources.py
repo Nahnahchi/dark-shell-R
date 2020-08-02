@@ -5,9 +5,10 @@ from os import listdir, getcwd, getenv, makedirs, startfile
 import sys
 
 APPDATA = join(getenv("APPDATA"), "DarkShellR")
+WORK_DIR = getattr(sys, '_MEIPASS', getcwd())
 SAVE_DIR = join(APPDATA, "save")
 MOD_DIR = join(APPDATA, "mod")
-RES_DIR = join(getattr(sys, '_MEIPASS', getcwd()), "dsres")
+RES_DIR = join(WORK_DIR, "dsres")
 
 
 try:
@@ -28,7 +29,9 @@ def open_resource(args: list):
     if "appdata" in args:
         startfile(APPDATA)
     if "cwd" in args:
-        startfile(RES_DIR)
+        startfile(WORK_DIR)
+    if "flag-map" in args:
+        startfile(join(RES_DIR, "flags", "named_flags.txt"))
     if "github" in args:
         import webbrowser
         from _version import __github__
@@ -121,28 +124,28 @@ def clear_mod_items(categories: dict):
 
 
 def get_bonfires():
-    return open("%s/bonfires.txt" % join(RES_DIR, "misc"), "r").readlines()
+    return open(join(RES_DIR, "misc", "bonfires.txt"), "r").readlines()
 
 
 def get_items(file_name: str):
-    return open("%s/%s" % (join(RES_DIR, "items"), file_name), "r").readlines()
+    return open(join(RES_DIR, "items", file_name), "r").readlines()
 
 
 def get_mod_items(file_name: str):
-    return open("%s/%s" % (MOD_DIR, file_name), "r").readlines()
+    return open(join(MOD_DIR, file_name), "r").readlines()
 
 
 def get_infusions():
-    return open("%s/infusions.txt" % join(RES_DIR, "misc"), "r").readlines()
+    return open(join(RES_DIR, "misc", "infusions.txt"), "r").readlines()
 
 
 def get_covenants():
-    return open("%s/covenants.txt" % join(RES_DIR, "misc"), "r").readlines()
+    return open(join(RES_DIR, "misc", "covenants.txt"), "r").readlines()
 
 
 def get_banners():
-    return open("%s/banners.txt" % join(RES_DIR, "misc"), "r").readlines()
+    return open(join(RES_DIR, "misc", "banners.txt"), "r").readlines()
 
 
 def get_known_flags():
-    return open("%s/%s" % (RES_DIR, "flags"), "r").readlines()
+    return open(join(RES_DIR, "flags", "named_flags.txt"), "r").readlines()

@@ -338,9 +338,8 @@ class DarkSouls(DSRProcess):
             print(Fore.RED + (format_exc() if self._debug else "%s in '%s' — %s" % (
                 type(e).__name__, _getframe().f_code.co_name, e)) + Fore.RESET)
         finally:
-            if pid in DarkSouls.WAITING_FUNC.keys():
-                DarkSouls.WAITING_FUNC.pop(pid)
-                self.save_func()
+            DarkSouls.WAITING_FUNC.pop(pid, None)
+            self.save_func()
 
     def read_performed_animations(self):
         print(Fore.LIGHTBLUE_EX + "\n\tTime\t\tID" + Fore.RESET)
@@ -575,8 +574,7 @@ class DarkSouls(DSRProcess):
                 if speed != 1.0:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def set_phantom_type():
@@ -640,8 +638,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_gravity():
@@ -652,8 +649,7 @@ class DarkSouls(DSRProcess):
                 if not enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_dead():
@@ -664,8 +660,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_stamina_consume():
@@ -676,8 +671,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_goods_consume():
@@ -688,8 +682,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_damage():
@@ -700,8 +693,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_hit():
@@ -712,8 +704,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_update():
@@ -724,8 +715,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_magic_all():
@@ -736,8 +726,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_ammo_consume_all():
@@ -748,8 +737,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_dead_all():
@@ -760,8 +748,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_damage_all():
@@ -772,8 +759,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_hit_all():
@@ -784,8 +770,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_attack_all():
@@ -796,8 +781,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_move_all():
@@ -808,8 +792,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_no_update_ai_all():
@@ -820,8 +803,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_death_cam():
@@ -832,8 +814,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_player_dead_mode():
@@ -844,8 +825,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_player_exterminate():
@@ -856,8 +836,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_player_hide():
@@ -868,8 +847,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_player_silence():
@@ -880,8 +858,7 @@ class DarkSouls(DSRProcess):
                 if enable:
                     DarkSouls.STATIC_FUNC[key] = arguments
                 else:
-                    if key in DarkSouls.STATIC_FUNC.keys():
-                        DarkSouls.STATIC_FUNC.pop(key)
+                    DarkSouls.STATIC_FUNC.pop(key, None)
 
             @staticmethod
             def enable_events():

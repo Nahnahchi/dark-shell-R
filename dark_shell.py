@@ -1,5 +1,6 @@
 from sys import argv, _getframe
-from os import _exit, system
+from os import system
+from nt import _exit
 from threading import Thread, Event
 from dslib.manager import DarkSouls
 from dslib.process import wait_for

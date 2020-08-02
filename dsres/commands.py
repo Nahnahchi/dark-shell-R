@@ -985,6 +985,7 @@ DSR_NEST = {
         "open": {
             "appdata": None,
             "cwd": None,
+            "flag-map": None,
             "github": None
         },
         "test": {
