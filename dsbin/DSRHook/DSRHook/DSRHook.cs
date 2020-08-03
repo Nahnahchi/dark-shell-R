@@ -102,18 +102,15 @@ namespace DarkShellRemastered
         {
             Offsets = DSROffsets.GetOffsets(Process.MainModule.ModuleMemorySize);
             
-            CELib.loadEngine();
-
             ChrMapData = CreateChildPointer(ChrData1, (int)DSROffsets.ChrData1.ChrMapData + Offsets.ChrData1Boost1);
             ChrAnimData = CreateChildPointer(ChrMapData, (int)DSROffsets.ChrMapData.ChrAnimData);
             ChrPosData = CreateChildPointer(ChrMapData, (int)DSROffsets.ChrMapData.ChrPosData);
 
-            CELib.iOpenProcess(Process.Id.ToString("X"));
         }
 
         public void DSRHook_OnUnhooked()
         {
-            CELib.unloadEngine();
+
         }
 
         private static readonly Dictionary<int, string> VersionStrings = new Dictionary<int, string>
@@ -412,59 +409,6 @@ namespace DarkShellRemastered
             bytes = BitConverter.GetBytes(BonfireWarpAddr.Resolve().ToInt64());
             Array.Copy(bytes, 0, asm, 0x18, 8);
             return Execute(asm);
-        }
-
-        public static string StringToByteArray(string hex)
-        {
-            if (hex.Length % 2 == 1)
-                hex = "0" + hex;
-
-            string[] arr = new string[hex.Length >> 1];
-
-            for (int i = 0; i < hex.Length >> 1; ++i)
-            {
-                arr[i] = ((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1]))).ToString("X");
-            }
-
-            for (int i = 0; i < arr.Length; i++)
-            {
-                if (arr[i].Length == 1)
-                {
-                    arr[i] = "0" + arr[i];
-                }
-            }
-
-            return string.Join(" ", arr.Reverse());
-        }
-
-        public static int GetHexVal(char hex)
-        {
-            int val = (int)hex;
-            //For uppercase A-F letters:
-            //return val - (val < 58 ? 48 : 55);
-            //For lowercase a-f letters:
-            //return val - (val < 58 ? 48 : 87);
-            //Or the two combined, but a bit slower:
-            return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
-        }
-
-        public void EnableEnemyControl(bool value)
-        {
-            string script = DSRAssembly.EnemyControl;
-            
-            script = script.Replace("{WorldChrBase}", WorldChrBase.Resolve().ToString("X"))
-                           .Replace("{StopMyChr}", StopMyChr.Resolve().ToString("X"))
-                           .Replace("{EntityAngle}", EntityAngle.Resolve().ToString("X"))
-                           .Replace("{EntityCam}", EntityCam.Resolve().ToString("X"))
-                           .Replace("{DownArrowInput}", DownArrowInput.Resolve().ToString("X"))
-                           .Replace("{ArrowUpInput}", ArrowUpInput.Resolve().ToString("X"))
-                           .Replace("{GamepadYInput})", GamepadYInput.Resolve().ToString("X"))
-                           .Replace("{EnemyAttacks}", EnemyAttacks.Resolve().ToString("X"));
-
-            Console.WriteLine(script);
-
-            CELib.iAddScript("EnemyControl", script);
-            CELib.iActivateRecord(0, value);
         }
 
         public bool SetAnimSpeed(float value)

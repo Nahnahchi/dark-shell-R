@@ -42,14 +42,14 @@ class DSRCmd:
 
     def __init__(self, debug=False):
         self._debug = debug
-        self.completer = None
-        self.history = InMemoryHistory()
+        self._completer = None
+        self._history = InMemoryHistory()
 
     class Parser:
 
         def __init__(self, args: str):
             args = args.split()
-            self.command = args[0] if len(args) > 0 else ""
+            self.command = args[0] if len(args) > 0 else DSRCmd.default
             self.arguments = args[1:] if len(args) > 1 else [DSRCmd.default]
 
         def get_command(self):
@@ -63,15 +63,15 @@ class DSRCmd:
         return prefix.replace("-", "_") + "_" + name.replace("-", "_")
 
     def set_nested_completer(self, nest: dict):
-        self.completer = DSRCompleter.from_nested_dict(nest)
+        self._completer = DSRCompleter.from_nested_dict(nest)
 
     def cmd_loop(self):
         while True:
             try:
                 user_inp = prompt(
                     DSRCmd.prompt_prefix,
-                    completer=self.completer,
-                    history=self.history,
+                    completer=self._completer,
+                    history=self._history,
                     enable_history_search=True
                 )
                 parser = DSRCmd.Parser(user_inp)
@@ -88,7 +88,7 @@ class DSRCmd:
             getattr(
                 self, DSRCmd.get_method_name(
                     prefix=DSRCmd.com_prefix,
-                    name=command if command.strip() else DSRCmd.default
+                    name=command
                 )
             )(arguments)
         except AttributeError as e:
